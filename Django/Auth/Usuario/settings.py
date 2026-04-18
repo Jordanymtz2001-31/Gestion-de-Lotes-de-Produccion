@@ -51,12 +51,14 @@ from datetime import timedelta # Importamos timedelta para definir el tiempo de 
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=7), #Caducidad del token
+    #'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
 #Configuracion para autenticacion y permisos para los usuarios
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.BasicAuthentication', #Indicamos que usaremos autenticacion basica
+        'rest_framework_simplejwt.authentication.JWTAuthentication', #Indicamos que usaremos autenticacion JWT para que reconozca el token
     ],
 
     'DEFAULT_PERMISSION_CLASSES': [
@@ -133,7 +135,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es-mx'
 
 TIME_ZONE = 'UTC'
 

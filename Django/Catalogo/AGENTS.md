@@ -19,6 +19,9 @@
 - PRODUCTO tiene muchos LOTE (related_name='lotes')
 - PROVEEDOR tiene muchos LOTE (related_name='lotes')
 
+## Por que ambas tablas aqui?
+- El problema es que un Lote necesita tanto el producto_id como el proveedor_id al mismo tiempo. Si están en servicios separados, cuando el servicio de Inventario crea un lote tiene que validar que ese producto existe llamando a Productos, y que ese proveedor existe llamando a Proveedores — dos llamadas REST en lugar de una. Y si una falla, tienes que manejar ese error a la mitad de la operación
+
 ## Notas de Modelo
 
 - `stock_actual` del producto se calcula dinámicamente: suma de `cantidad_actual` de todos los lotes en estado "Aprobado"

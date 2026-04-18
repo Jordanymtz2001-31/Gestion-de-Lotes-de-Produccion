@@ -28,7 +28,81 @@ El sistema está compuesto por 5 servicios independientes con API Gateway:
 
 ---
 
-## 3. Modelo de Datos (ERD Simplificado)
+## 3. API Gateway
+
+> **Para más detalles:** Consultar `./Gateway/AGENTS.md`
+
+El API Gateway es el punto de entrada único del sistema. Todas las peticiones pasan por él.
+
+### Responsabilidades
+
+1. **Validación JWT**: Verifica el token de cada petición
+2. **Headers de contexto**: Agrega información del usuario para los servicios
+3. **Enrutamiento**: Dirige las peticiones al servicio correspondiente
+4. **Rutas públicas**: Permite acceso sin token a `/health/` y `/auth/login/`
+
+### Headers agregados
+
+Cuando el JWT es válido, el Gateway agrega:
+- `X-User-Id`: ID del usuario
+- `X-User-Nombre`: Nombre del usuario
+- `X-User-Rol`: Rol del usuario (admin, operador, supervisor)
+
+### Rutas de servicios
+
+| Servicio | Prefijo |
+|----------|---------|
+| Auth | /auth/* |
+| Catálogo | /catalogo/* |
+| Inventario | /inventario/* |
+| Calidad | /calidad/* |
+| Alertas | /alertas/* |
+
+---
+
+## 4. Comunicación entre Microservicios
+
+> **Importante:** Para detalles específicos de cada servicio, consultar su AGENTS.md respectivo:
+> - Auth: `./Auth/AGENTS.md`
+> - Catálogo: `./Catalogo/AGENTS.md`
+> - Inventario: `./Inventario/AGENTS.md`
+> - Calidad: `./Calidad/AGENTS.md`
+> - Alertas: `./Alertas/AGENTS.md`
+
+### Flujo de comunicación
+
+```
+Angular (Frontend)
+    │
+    ▼
+API Gateway (valida JWT, agrega headers)
+    │
+    ├─► Auth Service    (/auth/*)
+    ├─► Catalogo Service (/catalogo/*)
+    ├─► Inventario Service (/inventario/*)
+    ├─► Calidad Service (/calidad/*)
+    └─► Alertas Service (/alertas/*)
+```
+
+### Comunicación servicio a servicio
+
+Los servicios pueden comunicarse entre sí:
+
+- **Inventario → Alertas**: Cuando se registra una salida, Inventario notifica a Alertas para verificar stock
+- **Calidad → Inventario**: Cuando se aprueba un lote, Calidad notifica a Inventario para actualizar estado
+
+> **Nota:** En versión futura se usará Redis + Celery para esta comunicación asíncrona.
+
+### Headers trustados
+
+Los servicios reciben los headers del Gateway y confían en ellos (no validan el JWT nuevamente):
+- `request.META['HTTP_X_USER_ID']`
+- `request.META['HTTP_X_USER_NOMBRE']`
+- `request.META['HTTP_X_USER_ROL']`
+
+---
+
+## 5. Modelo de Datos (ERD Simplificado)
 
 ### Entidades principales
 
@@ -103,7 +177,7 @@ El sistema está compuesto por 5 servicios independientes con API Gateway:
 
 ---
 
-## 4. Sistema de Autenticación JWT
+## 5. Sistema de Autenticación JWT
 
 ### Decisión de diseño
 
@@ -207,7 +281,7 @@ def registrar_entrada(request):
 
 ---
 
-## 5. Patrones Django/DRF
+## 6. Patrones Django/DRF
 
 > ⚠️ **Importante:** Consultar skill `django-expert` en `.agents/skills/django-expert/` para detalles completos.
 
@@ -322,7 +396,7 @@ SESSION_COOKIE_SECURE = True
 
 ---
 
-## 6. Flujos de Negocio Clave
+## 7. Flujos de Negocio Clave
 
 ### Flujo 1: Aprobación de lotes
 
@@ -377,7 +451,7 @@ Ajuste:
 
 ---
 
-## 7. Pendientes Técnicos
+## 8. Pendientes Técnicos
 
 - [ ] Implementar Redis para blacklist de tokens (futuro)
 - [ ] Implementar cola de eventos con Celery + Redis
@@ -387,7 +461,7 @@ Ajuste:
 
 ---
 
-## 8. Estructura de AGENTS por Microservicio
+## 9. Estructura de AGENTS por Microservicio
 
 Cada microservicio tiene su propio `AGENTS.md` con contexto específico:
 

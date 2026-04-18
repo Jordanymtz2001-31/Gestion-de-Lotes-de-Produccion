@@ -37,9 +37,17 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'api',
+    'rest_framework',
+    'corsheaders',
+]
+
+CORS_ALLOW_ALL_ORIGINS = [
+    "http://localhost:4200", # Dominio del Frontend
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -72,10 +80,16 @@ WSGI_APPLICATION = 'Producto.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+import os
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.environ.get('DB_NAME', 'inventario_db'),
+        'USER': os.environ.get('DB_USER', 'Dany'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', '12345678j'),
+        'HOST': os.environ.get('DB_HOST','localhost'),
+        'PORT': os.environ.get('DB_POST','3306')
     }
 }
 

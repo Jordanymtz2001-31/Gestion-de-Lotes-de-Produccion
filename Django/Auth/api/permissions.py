@@ -3,7 +3,7 @@ from rest_framework.permissions import BasePermission
 #Para crear un permiso personalizado debemos crear una clase abstracta que herede de BasePermission
 
 class Is_Operador(BasePermission):
-    def has_permission(self, request):
+    def has_permission(self, request, view):
         #Obtenemos el usuario
         #El getattr es para obtener un atributo de un objeto es decir user
         #El None en si el request no tiene un atributo user, devuelve None en ves de un error
@@ -18,7 +18,7 @@ class Is_Operador(BasePermission):
 
 
 class Is_Supervisor(BasePermission):
-    def has_permission(self, request):
+    def has_permission(self, request, view):
         user = getattr(request, 'user', None)
         if not user or not user.is_authenticated:
             return False
@@ -26,7 +26,7 @@ class Is_Supervisor(BasePermission):
 
 
 class Is_Admin(BasePermission):
-    def has_permission(self, request):
+    def has_permission(self, request, view):
         user = getattr(request, 'user', None)
         if not user or not user.is_authenticated:
             return False

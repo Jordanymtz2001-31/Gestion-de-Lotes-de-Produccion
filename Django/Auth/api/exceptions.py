@@ -18,7 +18,7 @@ def custom_exception_handler(exc, context):
             response.data = {'error': 'Credenciales invalidas, Autenticacion Fallida'}
             response.status_code = status.HTTP_401_UNAUTHORIZED # Estatus 401 Credenciales no validadas
         elif isinstance(exc, PermissionDenied):
-            response.data = {'error': 'No tienes permiso para realizar esta accion, Permiso Denegado'}
+            response.data = {'error': 'Estas autenticado, pero no tienes permiso para realizar esta accion, Permiso Denegado'}
             response.status_code = status.HTTP_403_FORBIDDEN # Estatus 403 Credenciales validadas, pero no autorizado para la accion solicitada
 
     return response
