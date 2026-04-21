@@ -14,22 +14,24 @@
 Auth/
 ├── api/
 │   ├── __init__.py
-│   ├── admin.py          # Configuración del admin de Django
+│   ├── admin.py           # Configuración del admin de Django
 │   ├── apps.py
-│   ├── exceptions.py   # Manejador de excepciones personalizado
+│   ├── exceptions.py     # Manejador de excepciones personalizado
 │   ├── migrations/
-│   ├── models.py      # Modelo Usuario (extends AbstractUser)
-│   ├── permissions.py # Permisos personalizados por rol
+│   │   ├── 0001_initial.py
+│   │   └── 0002_alter_usuario_email.py
+│   ├── models.py         # Modelo Usuario (extends AbstractUser)
+│   ├── permissions.py   # Permisos personalizados por rol
 │   ├── serializers.py
 │   ├── tests.py
-│   ├── urls.py      # Rutas del API
-│   └── views.py    # Vistas: LoginView, UsuarioViewSet, VerifyView
+│   ├── urls.py         # Rutas del API
+│   └── views.py       # Vistas: LoginView, UsuarioViewSet, VerifyView
 ├── Usuario/
-│   ├── settings.py  # Configuración Django
-│   ├── urls.py    # URLs principales
+│   ├── settings.py    # Configuración Django
+│   ├── urls.py       # URLs principales
 │   ├── wsgi.py
 │   └── manage.py
-└── db.sqlite3   # Base de datos (desarrollo)
+└── db.sqlite3       # Base de datos (desarrollo)
 ```
 
 ## 3. Modelo de Datos
@@ -37,6 +39,9 @@ Auth/
 ### Usuario (api/models.py)
 
 ```python
+from django.db import models
+from django.contrib.auth.models import AbstractUser
+
 class Usuario(AbstractUser):
     ROLES = (
         ('OPERADOR', 'Operador'),
@@ -45,7 +50,10 @@ class Usuario(AbstractUser):
     )
     
     rol = models.CharField(max_length=20, choices=ROLES, blank=False, null=False)
-    email = models.EmailField(unique=True)
+    email = models.EmailField(unique=True, error_messages={'unique': 'Ya existe un usuario con ese correo electrónico'})
+
+    def __str__(self):
+        return self.username
 ```
 
 | Campo | Tipo | Restricciones |
@@ -58,6 +66,8 @@ class Usuario(AbstractUser):
 | is_active | Boolean | Default True |
 | date_joined | DateTime | Auto |
 
+**Hereda de AbstractUser:** first_name, last_name, is_staff, is_active, date_joined, last_login, etc.
+
 ### Roles disponibles
 
 | Rol | Descripción |
@@ -66,15 +76,97 @@ class Usuario(AbstractUser):
 | OPERADOR | Registros de inventario |
 | SUPERVISOR | Aprobación de lotes, reportes de calidad |
 
-## 4. Endpoints del API
+## 4. Configuración Principal
+
+### settings.py (Usuario/settings.py)
+
+```python
+from pathlib import Path
+from datetime import timedelta
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+SECRET_KEY = 'django-insecure-$r3l1j)d=^fyy-qs2-kw7v-xlb(!z0(8r5mtv0px#0!zqg5(hj'
+
+DEBUG = True
+
+ALLOWED_HOSTS = []
+
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'api',
+    'rest_framework',
+    'rest_framework_simplejwt',
+    'corsheaders',
+]
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:4200",
+]
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=7),
+}
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'EXCEPTION_HANDLER': 'api.exceptions.custom_exception_handler',
+}
+
+AUTH_USER_MODEL = 'api.Usuario'
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
+```
+
+**Configuraciones importantes:**
+- `AUTH_USER_MODEL = 'api.Usuario'` - Indica que usamos nuestro modelo personnalisé
+- `JWTAuthentication` en DEFAULT_AUTHENTICATION_CLASSES - Necessario para reconocer tokens JWT
+- CORS configurado para localhost:4200 (Angular)
+
+## 5. Endpoints del API
 
 ### Rutas configuradas (api/urls.py + Usuario/urls.py)
 
+```python
+# Usuario/urls.py
+from django.urls import path, include
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('usuario/', include('api.urls')),
+]
+
+# api/urls.py
+from rest_framework.routers import DefaultRouter
+from api import views
+
+router = DefaultRouter()
+router.register(r'usuarios', views.UsuarioViewSet, basename='usuario')
+
+urlpatterns = [
+    path('login/', views.LoginView.as_view(), name='login'),
+    path('verify/', views.VerifyView.as_view(), name='verify'),
+    path('', include(router.urls)),
+]
 ```
-/usuario/login/      → POST LoginView
-/usuario/verify/     → GET/POST VerifyView (para nginx)
-/usuario/usuarios/   → UsuarioViewSet (CRUD)
-```
+
+### URLs finales
 
 | Método | URL | Descripción | Auth |
 |--------|-----|------------|------|
@@ -86,7 +178,7 @@ class Usuario(AbstractUser):
 | PUT/PATCH | `/usuario/usuarios/{id}/` | Actualizar usuario | JWT + ADMIN |
 | DELETE | `/usuario/usuarios/{id}/` | Eliminar usuario | JWT + ADMIN |
 
-## 5. Serializers
+## 6. Serializers
 
 ### RegistrarUsuarioSerializer (api/serializers.py:5)
 
@@ -126,12 +218,43 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
 ```
 
-## 6. Views
+## 7. Views
 
 ### LoginView (api/views.py:38)
 
 - **Permission**: AllowAny (público)
 - **POST**: Valida credenciales, retorna access token JWT + datos del usuario
+
+```python
+class LoginView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = LoginSerializer(data=request.data)
+        if serializer.is_valid():
+            username = serializer.validated_data['username']
+            password = serializer.validated_data['password']
+
+            user = authenticate(username=username, password=password)
+            if user is None:
+                return Response(
+                    {'error': 'Credenciales inválidas'},
+                    status=status.HTTP_401_UNAUTHORIZED
+                )
+
+            refresh = RefreshToken.for_user(user)
+            return Response({
+                'access': str(refresh.access_token),
+                'user': {
+                    'id': user.id,
+                    'username': user.username,
+                    'email': user.email,
+                    'rol': user.rol
+                }
+            })
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+```
 
 **Request:**
 ```json
@@ -160,17 +283,86 @@ class LoginSerializer(serializers.Serializer):
 - **CRUD completo** de usuarios
 - Solo usuarios con rol ADMIN pueden crear nuevos usuarios
 
+```python
+class UsuarioViewSet(viewsets.ModelViewSet):
+    queryset = Usuario.objects.all()
+    serializer_class = UsuarioSerializer
+    permission_classes = [IsAuthenticated, Is_Admin]
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return RegistrarUsuarioSerializer
+        return UsuarioSerializer
+
+    def create(self, request, *args, **kwargs):
+        user_rol = (getattr(request.user, 'rol', '') or '').upper()
+        if user_rol != 'ADMIN':
+            return Response(
+                {'error': 'Solo administradores pueden crear usuarios'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        return super().create(request, *args, **kwargs)
+```
+
 ### VerifyView (api/views.py:72)
 
 - **Permission**: AllowAny (público)
 - Decodifica el token JWT y expone headers para nginx (X-User-ID, X-User-Rol)
 - Útil para autenticación a nivel de nginx con auth_request
 
-## 7. Permissions
+```python
+class VerifyView(APIView):
+    permission_classes = [AllowAny]
 
-### Is_Admin (api/permissions.py:28)
+    def get(self, request):
+        return self._verify(request)
+
+    def post(self, request):
+        return self._verify(request)
+
+    def _verify(self, request):
+        token = request.headers.get('Authorization', '').replace('Bearer ', '').strip()
+
+        if not token:
+            return JsonResponse({}, status=status.HTTP_401_UNAUTHORIZED)
+
+        try:
+            tb = TokenBackend(
+                algorithm=settings.SIMPLE_JWT.get('ALGORITHM', 'HS256'),
+                signing_key=settings.SIMPLE_JWT.get('SIGNING_KEY', settings.SECRET_KEY)
+            )
+            payload = tb.decode(token, verify=True)
+
+            response = JsonResponse({}, status=status.HTTP_200_OK)
+            response['X-User-ID'] = str(payload.get('user_id', ''))
+            response['X-User-Rol'] = payload.get('rol', '')
+
+            return response
+        except Exception:
+            return JsonResponse({}, status=401)
+```
+
+## 8. Permissions
+
+### Estructura (api/permissions.py)
 
 ```python
+from rest_framework.permissions import BasePermission
+
+class Is_Operador(BasePermission):
+    def has_permission(self, request, view):
+        user = getattr(request, 'user', None)
+        if not user or not user.is_authenticated:
+            return False
+        return (getattr(user, 'rol', '') or '').upper() == 'OPERADOR'
+
+class Is_Supervisor(BasePermission):
+    def has_permission(self, request, view):
+        user = getattr(request, 'user', None)
+        if not user or not user.is_authenticated:
+            return False
+        return (getattr(user, 'rol', '') or '').upper() == 'SUPERVISOR'
+
 class Is_Admin(BasePermission):
     def has_permission(self, request, view):
         user = getattr(request, 'user', None)
@@ -179,36 +371,56 @@ class Is_Admin(BasePermission):
         return (getattr(user, 'rol', '') or '').upper() == 'ADMIN'
 ```
 
-**Nota**: El método `has_permission` recibe 3 parámetros: `self, request, view`. El parámetro `view` es opcional pero debe declararse.
+**Importante**: El método `has_permission` recibe 3 parámetros: `self, request, view`. El parámetro `view` es obligatorio en la firma del método.
 
-Analogous classes: Is_Operador, Is_Supervisor
+## 9. Custom Exception Handler
 
-## 8. Configuración JWT
+### api/exceptions.py
 
-### settings.py
+Manejador de excepciones personalizado para mensajes de error consistentes.
 
 ```python
-from datetime import timedelta
+from rest_framework.views import exception_handler
+from rest_framework.exceptions import PermissionDenied, NotAuthenticated, AuthenticationFailed, ValidationError
+from django.http import Http404
+from rest_framework import status
 
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=7),  # Token válido por 7 días
-}
+def custom_exception_handler(exc, context):
+    response = exception_handler(exc, context)
 
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
-    ],
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
-    ],
-    'EXCEPTION_HANDLER': 'api.exceptions.custom_exception_handler',
-}
+    if response is not None:
+        if isinstance(exc, NotAuthenticated):
+            response.data = {'error': 'No esta autenticado, Autenticacion Fallida'}
+            response.status_code = status.HTTP_401_UNAUTHORIZED
+        elif isinstance(exc, AuthenticationFailed):
+            response.data = {'error': 'Credenciales invalidas, Autenticacion Fallida'}
+            response.status_code = status.HTTP_401_UNAUTHORIZED
+        elif isinstance(exc, PermissionDenied):
+            response.data = {'error': 'Estas autenticado, pero no tienes permiso para realizar esta accion, Permiso Denegado'}
+            response.status_code = status.HTTP_403_FORBIDDEN
+        elif isinstance(exc, ValidationError):
+            response.data = {'error': 'Datos no validos, falta de datos o caracteres invalidos'}
+            response.status_code = status.HTTP_400_BAD_REQUEST
+        elif isinstance(exc, Http404):
+            response.data['detail'] = 'No se encontro el recurso solicitado'
+
+    return response
 ```
 
-**Importante**: JWTAuthentication debe estar en DEFAULT_AUTHENTICATION_CLASSES para que DRF reconozca los tokens JWT.
+## 10. Admin Django
 
-## 9. Crear Primer Administrador
+### api/admin.py
+
+```python
+from django.contrib import admin
+from api.models import Usuario
+
+@admin.register(Usuario)
+class UsuarioAdmin(admin.ModelAdmin):
+    list_display = ('username', 'rol')
+```
+
+## 11. Crear Primer Administrador
 
 ### Problema: "El huevo y la gallina"
 
@@ -217,7 +429,7 @@ Si no hay usuarios en la DB y el endpoint de creación requiere ADMIN, ¿cómo c
 ### Solución: Comando CLI
 
 ```bash
-# Dentro de Django/Auth/
+cd Django/Auth
 python manage.py shell
 ```
 
@@ -236,9 +448,14 @@ Usuario.objects.create_user(
 
 O desde el admin de Django después de crear superuser:
 1. `python manage.py createsuperuser` → crear superuser
-2. Ejecutar shell y asignar rol: `u = Usuario.objects.get(username='admin'); u.rol = 'ADMIN'; u.save()`
+2. Ejecutar shell y asignar rol:
+```python
+u = Usuario.objects.get(username='admin')
+u.rol = 'ADMIN'
+u.save()
+```
 
-## 10. Cómo Usar el Servicio
+## 12. Cómo Usar el Servicio
 
 ### 1. Login (obtener token)
 
@@ -264,7 +481,7 @@ curl -X POST http://localhost:8000/usuario/usuarios/ \
   -d '{"username": "nuevo_op", "email": "op@textiles.com", "password": "pass123", "rol": "OPERADOR"}'
 ```
 
-## 11. Errores Comunes y Soluciones
+## 13. Errores Comunes y Soluciones
 
 | Error | Causa | Solución |
 |-------|-------|---------|
@@ -279,7 +496,9 @@ curl -X POST http://localhost:8000/usuario/usuarios/ \
 ```python
 # Verificar duplicados
 from api.models import Usuario
- Usuario.objects.values('email').annotate(cnt=models.Count('email')).filter(cnt__gt=1)
+from django.db.models import Count
+
+Usuario.objects.values('email').annotate(cnt=Count('email')).filter(cnt__gt=1)
 
 # Eliminar duplicados
 usuarios = Usuario.objects.filter(email='dup@email.com').order_by('id')
@@ -287,7 +506,7 @@ principal = usuarios.first()
 usuarios.exclude(id=principal.id).delete()
 ```
 
-## 12. Migraciones
+## 14. Migraciones
 
 Cuando se hace cambios en el modelo:
 
@@ -299,18 +518,27 @@ python manage.py migrate
 
 **Nota para email unique**: Si ya hay datos duplicados, la migración fallará. Limpiar duplicados primero.
 
-## 13. Patrones Recomendados
+### Historial de migraciones
+
+| Migration | Descripción |
+|----------|-------------|
+| 0001_initial.py | Creación del modelo Usuario |
+| 0002_alter_usuario_email.py | Agregar unique=True al campo email |
+
+## 15. Patrones Recomendados
 
 - Usar AbstractUser de Django como base
 - Campo email con unique=True en modelo (requiere migrate)
 - Passwords hasheados con make_password()
 - JWT con access token largo (7 días), sin refresh
-- Permissions personalizadas por rol
+- Permissions personalizadas por rol (con parámetro `view`)
 - JWTAuthentication en DEFAULT_AUTHENTICATION_CLASSES
+- Custom exception handler para mensajes consistentes
 
-## 14. Pendientes
+## 16. Pendientes
 
 - [ ] Redis para blacklist de tokens (versión futura)
 - [ ] Implementar logout (invalidar token)
 - [ ] Refresh token si se necessita sesión más corta
 - [ ] Tests unitarios
+- [ ] Logging detallado

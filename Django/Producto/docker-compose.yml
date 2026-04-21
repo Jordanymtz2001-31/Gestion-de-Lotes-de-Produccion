@@ -1,0 +1,58 @@
+# Para este servicio vamos a crear Dos Contenedores
+#Contenedor de MySQL
+services:
+  producto_db:
+    image: mysql:8.0 #Aqui se utiliza la ultima version de mysql
+    container_name: producto_db #Nombre del contenedor
+    restart: always #Siempre se reinicia el contenedor si falla
+    environment:
+      MYSQL_DATABASE: producto_db #Nombre de la base de datos
+      MYSQL_USER: Dany #Usuario de la base de datos
+      MYSQL_ROOT_PASSWORD: root #Contraseña de la base de datos
+      MYSQL_PASSWORD: 12345678j #Contraseña de la base de datos
+    ports:
+      - "3307:3306" #Puerto para acceder a la base de datos
+    volumes:
+      - mysql_producto_data:/var/lib/mysql #Volumen para almacenar los datos
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "Dany", "-p12345678j" ] #Comando para verificar la salud del contenedor
+      interval: 30s #Intervalo de verificacion
+      timeout: 10s #Tiempo de espera
+      retries: 3 #Reintentos de verificacion
+      start_period: 60s #Tiempo de espera inicial el contenedor
+    networks:
+      - gestion_lote_net
+
+  # Segundo Contenedor
+  producto_app:
+    build: . #Contruimos en base la carpeta actual
+    container_name: producto_app #Nombre del contenedor
+    command: >
+      sh -c "python manage.py makemigrations &&
+             python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8001"
+    volumes:
+      - .:/app #Volumen para almacenar los datos
+    ports:
+      - "8001:8001"
+    depends_on:
+      producto_db:
+        condition: service_healthy # Aqui es para saber si el contenedor producto_db esta funcionando
+    environment:
+      - DB_HOST=producto_db
+      - DB_PORT=3306
+      - DB_NAME=producto_db
+      - DB_USER=Dany
+      - DB_PASSWORD=12345678j
+      - DJANGO_SETTINGS_MODULE=Producto.settings
+    restart: always #Siempre se reinicia el contenedor si falla
+    networks:
+      - gestion_lote_net
+
+networks:
+  gestion_lote_net:
+    external: true #Red externa
+
+volumes:
+  mysql_producto_data:
+    driver: local

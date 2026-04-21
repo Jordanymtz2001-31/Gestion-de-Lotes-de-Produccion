@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.exceptions import AuthenticationFailed, ValidationError
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 from rest_framework_simplejwt.backends import TokenBackend
 from rest_framework import status
 from django.contrib.auth import authenticate
@@ -12,6 +12,7 @@ from django.http import JsonResponse
 from api.serializers import UsuarioSerializer, LoginSerializer
 from api.permissions import Is_Admin
 from api.models import Usuario
+from api.tokens import CustomAccessToken  # importas tu clase personalizada de tokens
 
 class UsuarioViewSet(viewsets.ModelViewSet):
     queryset = Usuario.objects.all()
@@ -56,10 +57,10 @@ class LoginView(APIView):
                 raise AuthenticationFailed()
 
             #Si el usuario existe, creamos el token (solo access, sin refresh)
-            refresh = RefreshToken.for_user(user)
+            token = CustomAccessToken.for_user(user)
 
             return Response({
-                'access': str(refresh.access_token),
+                'access': str(token),
                 'user': {
                     'id': user.id,
                     'username': user.username,
@@ -74,7 +75,7 @@ class LoginView(APIView):
 
 # Vista para verificar token y exponer headers usados por nginx (X-User-ID, X-User-Rol)
 class VerifyView(APIView):#
-    permission_classes = [AllowAny]
+    permission_classes = [AllowAny] #Colocamos permiso para cualquier ya que Nginx lo usara (NO ES USUARIO)
 
     #Creamos dos metodos que estaran expuestos
     #Se exponen ambos para cubrir distintos escenarios de subrequest o pruebas

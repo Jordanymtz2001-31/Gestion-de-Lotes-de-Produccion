@@ -11,8 +11,5 @@ class Producto(models.Model):
     unidad_medida = models.CharField(max_length=20, null=False, blank=False)
     stock_actual = models.PositiveIntegerField(null=False, blank=False) # PositiveIntegerField para garantizar que el stock sea un número positivo
 
-
-class Proveedor(models.Model):
-    nombre = models.CharField(max_length=50, null=False, blank=False)
-    telefono = models.CharField(max_length=15, null=False, blank=False) 
-    email = models.EmailField(unique=True, null=False, blank=False, error_messages={'unique': 'Ya existe un proveedor con ese correo'})
+    class Meta:
+        db_table = 'Producto'

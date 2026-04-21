@@ -15,48 +15,80 @@
 
 ## 2. Arquitectura de Microservicios
 
-El sistema está compuesto por 5 servicios independientes con API Gateway:
+El sistema está compuesto por 7 servicios independientes con API Gateway:
 
-| Servicio | Tablas | Propósito |
-|----------|--------|-----------|
-| **API Gateway** | - | Valida JWT, enruta peticiones a servicios |
-| **Auth** | USUARIO | Login, generación JWT, gestión de usuarios |
-| **Catálogo** | PRODUCTO, PROVEEDOR | Catálogo maestro de productos y proveedores |
-| **Inventario** | LOTE, MOVIMIENTO | Núcleo del sistema: gestión de lotes y movimientos |
-| **Calidad** | REPORTE_CALIDAD | Inspecciones de calidad por lote |
-| **Alertas** | ALERTA_STOCK | Monitoreo de stock y generación de reportes PDF/Excel |
+| Servicio | Tablas | Propósito | Estado |
+|----------|--------|-----------|--------|
+| **API Gateway** | - | Valida JWT, enruta peticiones (nginx + Django) | ✅ Implementado |
+| **Auth** | USUARIO | Login, generación JWT, gestión de usuarios | ✅ Implementado |
+| **Producto** | PRODUCTO | Catálogo de productos textiles | ✅ Implementado |
+| **Proveedor** | PROVEEDOR | Catálogo de proveedores | ✅ Implementado |
+| **Inventario** | LOTE, MOVIMIENTO | Núcleo: gestión de lotes y movimientos | 🔄 Pendiente |
+| **Calidad** | REPORTE_CALIDAD | Inspecciones de calidad por lote | 🔄 Pendiente |
+| **Alertas** | ALERTA_STOCK | Monitoreo de stock y reportes | 🔄 Pendiente |
 
 ---
 
-## 3. API Gateway
+## 3. API Gateway (nginx + Django)
 
-> **Para más detalles:** Consultar `./Gateway/AGENTS.md`
+> **Para más detalles:** Consultar `./Api_Gateway/AGENTS.md`
 
-El API Gateway es el punto de entrada único del sistema. Todas las peticiones pasan por él.
+El API Gateway es el punto de entrada único. Toda petición pasa por él antes de llegar a los servicios.
 
-### Responsabilidades
+### Arquitectura
 
-1. **Validación JWT**: Verifica el token de cada petición
-2. **Headers de contexto**: Agrega información del usuario para los servicios
-3. **Enrutamiento**: Dirige las peticiones al servicio correspondiente
-4. **Rutas públicas**: Permite acceso sin token a `/health/` y `/auth/login/`
+```
+┌─────────────────────────────────────────────────────────┐
+│                      nginx:80                            │
+│  ┌─────────────────────────────────────────────────┐   │
+│  │              auth_request /auth-verify           │   │
+│  └──────────────────┬───────────────────────────────┘   │
+│                     │ (subrequest interna)               │
+│  ┌──────────────────▼───────────────────────────────┐     │
+│  │         Django Auth Service                 │     │
+│  │         /usuario/verify/                    │     │
+│  └──────────────────────────────────────────┘     │
+└─────────────────────────────────────────────────────┘
+                           │
+              ┌────────────▼────────────┐
+              │ Headers trustados      │
+              │ X-User-ID, X-User-Rol│
+              └────────────┬────────────┘
+                          ▼
+        ┌─────────────────┬─────────────────┬──────────┐
+        ▼                 ▼                 ▼          ▼
+   /usuario/*       /producto/*     /proveedor/*   (futuro)
+   usuarios_app     producto_app   proveedor_app
+   :8000            :8001           :8002
+```
 
-### Headers agregados
+### Flujo de validación JWT
 
-Cuando el JWT es válido, el Gateway agrega:
-- `X-User-Id`: ID del usuario
-- `X-User-Nombre`: Nombre del usuario
-- `X-User-Rol`: Rol del usuario (admin, operador, supervisor)
+1. Cliente → nginx (puerto 80)
+2. nginx hace `auth_request /auth-verify` (subpetición interna)
+3. Auth Service valida token → devuelve headers si es válido
+4. nginx inyecta `X-User-ID` y `X-User-Rol` en la petición
+5. Petición reenviada al servicio destino
 
-### Rutas de servicios
+### Rutas configuradas
 
-| Servicio | Prefijo |
-|----------|---------|
-| Auth | /auth/* |
-| Catálogo | /catalogo/* |
-| Inventario | /inventario/* |
-| Calidad | /calidad/* |
-| Alertas | /alertas/* |
+| Ruta | Servicio | Contenedor | Puerto |
+|------|----------|------------|--------|
+| `/usuario/login/` | Auth | usuarios_app | 8000 |
+| `/usuario/` | Auth | usuarios_app | 8000 |
+| `/producto/` | Producto | producto_app | 8001 |
+| `/proveedor/` | Proveedor | proveedor_app | 8002 |
+
+### Rutas públicas (sin JWT)
+
+- `/usuario/login/`
+
+### Headers inyectados
+
+| Header | Descripción |
+|--------|------------|
+| `X-User-ID` | ID del usuario autenticado |
+| `X-User-Rol` | Rol del usuario (admin, operador, supervisor) |
 
 ---
 
@@ -64,7 +96,8 @@ Cuando el JWT es válido, el Gateway agrega:
 
 > **Importante:** Para detalles específicos de cada servicio, consultar su AGENTS.md respectivo:
 > - Auth: `./Auth/AGENTS.md`
-> - Catálogo: `./Catalogo/AGENTS.md`
+> - Producto: `./Producto/AGENTS.md`
+> - Proveedor: `./Proveedor/AGENTS.md`
 > - Inventario: `./Inventario/AGENTS.md`
 > - Calidad: `./Calidad/AGENTS.md`
 > - Alertas: `./Alertas/AGENTS.md`
@@ -75,13 +108,14 @@ Cuando el JWT es válido, el Gateway agrega:
 Angular (Frontend)
     │
     ▼
-API Gateway (valida JWT, agrega headers)
+API Gateway (nginx: valida JWT, inyecta headers)
     │
-    ├─► Auth Service    (/auth/*)
-    ├─► Catalogo Service (/catalogo/*)
-    ├─► Inventario Service (/inventario/*)
-    ├─► Calidad Service (/calidad/*)
-    └─► Alertas Service (/alertas/*)
+    ├─► Auth Service     (/usuario/*)   → usuarios_app:8000
+    ├─► Producto Service (/producto/*)  → producto_app:8001
+    ├─► Proveedor Service (/proveedor/*)  → proveedor_app:8002
+    ├─► Inventario      (/inventario/*) → (futuro)
+    ├─► Calidad        (/calidad/*)   → (futuro)
+    └─► Alertas        (/alertas/*)   → (futuro)
 ```
 
 ### Comunicación servicio a servicio
@@ -90,6 +124,7 @@ Los servicios pueden comunicarse entre sí:
 
 - **Inventario → Alertas**: Cuando se registra una salida, Inventario notifica a Alertas para verificar stock
 - **Calidad → Inventario**: Cuando se aprueba un lote, Calidad notifica a Inventario para actualizar estado
+- **Producto → Inventario**: Cuando se crea/modifica un producto, Inventario actualiza cálculo de stock
 
 > **Nota:** En versión futura se usará Redis + Celery para esta comunicación asíncrona.
 
@@ -97,7 +132,6 @@ Los servicios pueden comunicarse entre sí:
 
 Los servicios reciben los headers del Gateway y confían en ellos (no validan el JWT nuevamente):
 - `request.META['HTTP_X_USER_ID']`
-- `request.META['HTTP_X_USER_NOMBRE']`
 - `request.META['HTTP_X_USER_ROL']`
 
 ---
@@ -205,6 +239,62 @@ El access token JWT contiene:
 
 ### Flujo de autenticación
 
+```
+1. Login (ruta pública):
+   Angular → POST /usuario/login/ {email, password}
+   Auth valida credenciales → genera access_token (firma con JWT_SECRET)
+   Auth devuelve access_token → Angular lo guarda en memoria
+
+2. Peticiones normales:
+   Angular → Header: Authorization: Bearer <access_token>
+   nginx → auth_request /auth-verify (subrequest interna)
+         → Auth Service valida token en /usuario/verify/
+         → Si válido, nginx inyecta: X-User-ID, X-User-Rol
+         → Reenvía al servicio destino
+
+3. Servicios downstream:
+   Reciben headers trustados, NO validan tokens
+
+4. Logout:
+   Angular limpia el token de memoria
+   (No hay revocación en esta versión)
+```
+
+### API Gateway (validación JWT con nginx + Django)
+
+El API Gateway usa `auth_request` de nginx para validar JWT mediante subrequest interna:
+
+```python
+# Auth Service: /usuario/verify/ (Django)
+class VerifyView(APIView):
+    authentication_classes = []  # Sin auth Django
+    
+    def post(self, request):
+        token = request.headers.get('Authorization', '').replace('Bearer ', '')
+        
+        try:
+            payload = jwt.decode(token, settings.JWT_SECRET, algorithms=['HS256'])
+            # nginx captura estos headers con auth_request_set
+            return Response({
+                'X-User-Id': payload['user_id'],
+                'X-User-Rol': payload['rol']
+            }, status=200)
+        except jwt.ExpiredSignatureError:
+            return Response({'error': 'Token expirado'}, status=401)
+        except jwt.InvalidTokenError:
+            return Response({'error': 'Token inválido'}, status=401)
+```
+
+```nginx
+# nginx.conf - subrequest de verificación
+location = /auth-verify {
+    internal;  # Solo accesible via subrequest
+    proxy_set_header Host localhost;
+    proxy_pass http://usuarios_app:8000/usuario/verify/;
+    proxy_pass_request_body off;
+    proxy_set_header Authorization $http_authorization;
+    proxy_set_header X-Original-URI $request_uri;
+}
 ```
 1. Login:
    Angular → POST /auth/login {email, password}
@@ -453,10 +543,16 @@ Ajuste:
 
 ## 8. Pendientes Técnicos
 
-- [ ] Implementar Redis para blacklist de tokens (futuro)
+- [x] API Gateway con nginx + Django (auth_request)
+- [x] Auth Service con /usuario/verify/
+- [x] Producto Service (catálogo de productos)
+- [x] Proveedor Service (catálogo de proveedores)
+- [ ] Inventario Service (lotes y movimientos)
+- [ ] Calidad Service (inspecciones de calidad)
+- [ ] Alertas Service (monitoreo de stock)
+- [ ] Implementar Redis para blacklist de tokens
 - [ ] Implementar cola de eventos con Celery + Redis
 - [ ] Configurar health checks en cada servicio
-- [ ] Definir estructura de URLs por microservicio
 - [ ] Implementar tests unitarios por servicio
 
 ---
@@ -467,11 +563,12 @@ Cada microservicio tiene su propio `AGENTS.md` con contexto específico:
 
 | Microservicio | Ubicación | Propósito |
 |---------------|-----------|-----------|
+| **API Gateway** | `./Api_Gateway/AGENTS.md` | Validación JWT y routing (nginx) |
 | **Auth** | `./Auth/AGENTS.md` | Autenticación y gestión de usuarios |
-| **Catálogo** | `./Catalogo/AGENTS.md` | Productos y proveedores |
+| **Producto** | `./Producto/AGENTS.md` | Catálogo de productos |
+| **Proveedor** | `./Proveedor/AGENTS.md` | Catálogo de proveedores |
 | **Inventario** | `./Inventario/AGENTS.md` | Lotes y movimientos |
 | **Calidad** | `./Calidad/AGENTS.md` | Inspecciones de calidad |
 | **Alertas** | `./Alertas/AGENTS.md` | Stock y reportes |
-| **Gateway** | `./Gateway/AGENTS.md` | Validación JWT y routing |
 
 > **Nota:** Cada AGENTS.md de microservicio hace referencia al AGENTS.md raíz para contexto completo del proyecto.
