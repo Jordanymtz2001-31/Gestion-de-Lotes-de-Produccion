@@ -183,7 +183,7 @@ Los servicios reciben los headers del Gateway y confían en ellos (no validan el
 
 **Versión actual:** JWT con access token largo (sin refresh token)
 
-- Access token con validez extendida (ej: 7 días)
+- Access token con validez extendida (ej: 1 días)
 - Validación puramente por firma criptográfica (sin estado en servidor)
 - No requiere almacenamiento de tokens
 

@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-$r3l1j)d=^fyy-qs2-kw7v-xlb(!z0(8r5mtv0px#0!zqg5(hj
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["usuarios_app", "nginx", "localhost", "127.0.0.1"]
 
 
 # Application definition
@@ -50,7 +50,7 @@ CORS_ALLOWED_ORIGINS = [
 from datetime import timedelta # Importamos timedelta para definir el tiempo de expiracion
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=7), #Caducidad del token
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1), #Caducidad del token
     #'AUTH_HEADER_TYPES': ('Bearer',),
 }
 

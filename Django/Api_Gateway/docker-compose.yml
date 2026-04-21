@@ -1,0 +1,15 @@
+#Contenedor para la API Gateway
+services:
+  nginx:
+    image: nginx:latest #Aqui se utiliza la ultima version de nginx
+    container_name: gateway #Nombre del contenedor
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro #Volumen para almacenar el archivo de configuracion de nginx
+    networks:
+      - gestion_lote_net
+
+networks: #Red para conectar los contenedores
+  gestion_lote_net: 
+    external: true #Red externa

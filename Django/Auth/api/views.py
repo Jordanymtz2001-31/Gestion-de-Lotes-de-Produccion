@@ -2,15 +2,16 @@ from rest_framework import viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from django.contrib.auth import authenticate
-from rest_framework import status
-from api.serializers import RegistrarUsuarioSerializer, UsuarioSerializer, LoginSerializer
-from api.permissions import Is_Admin
-from api.models import Usuario
+from rest_framework.exceptions import AuthenticationFailed, ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.backends import TokenBackend
+from rest_framework import status
+from django.contrib.auth import authenticate
 from django.conf import settings
 from django.http import JsonResponse
-from rest_framework_simplejwt.backends import TokenBackend
+from api.serializers import UsuarioSerializer, LoginSerializer
+from api.permissions import Is_Admin
+from api.models import Usuario
 
 class UsuarioViewSet(viewsets.ModelViewSet):
     queryset = Usuario.objects.all()
@@ -19,6 +20,7 @@ class UsuarioViewSet(viewsets.ModelViewSet):
     #Definimos permisos
     permission_classes = [IsAuthenticated, Is_Admin]
 
+    """
     #Metodo para crear un usuario nuevo
     def get_serializer_class(self):
         if self.action == 'create':
@@ -31,8 +33,9 @@ class UsuarioViewSet(viewsets.ModelViewSet):
         user_rol = (getattr(request.user, 'rol', '') or '').upper()
         if user_rol != 'ADMIN':
             return Response({'error': 'Solo administradores pueden crear usuarios'}, status=status.HTTP_403_FORBIDDEN)
+            #raise PermissionDenied()
         return super().create(request, *args, **kwargs)
-    
+    """
 
 # Clase para la vista de inicio de sesión
 class LoginView(APIView):
@@ -48,9 +51,9 @@ class LoginView(APIView):
 
             user = authenticate(username=username, password=password)
             if user is None: # Si el usuario no existe
-                return Response(
-                    {'error': 'Credenciales inválidas'},status=status.HTTP_401_UNAUTHORIZED
-                )
+                # Dejar que el handler de excepciones personalizado construya
+                # la respuesta consistente para AuthenticationFailed
+                raise AuthenticationFailed()
 
             #Si el usuario existe, creamos el token (solo access, sin refresh)
             refresh = RefreshToken.for_user(user)
@@ -65,11 +68,12 @@ class LoginView(APIView):
                 }
             })
             
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # Si los datos no son validos, lo ma
+        raise ValidationError(serializer.errors)
+        #return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # Vista para verificar token y exponer headers usados por nginx (X-User-ID, X-User-Rol)
-class VerifyView(APIView):
+class VerifyView(APIView):#
     permission_classes = [AllowAny]
 
     #Creamos dos metodos que estaran expuestos
