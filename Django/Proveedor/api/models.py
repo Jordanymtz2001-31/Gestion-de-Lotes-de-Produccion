@@ -7,3 +7,6 @@ class Proveedor(models.Model):
     nombre = models.CharField(max_length=50, null=False, blank=False)
     telefono = models.CharField(max_length=15, null=False, blank=False) 
     email = models.EmailField(unique=True, null=False, blank=False, error_messages={'unique': 'Ya existe un proveedor con ese correo'})
+
+    class Meta:
+        db_table = 'proveedor'

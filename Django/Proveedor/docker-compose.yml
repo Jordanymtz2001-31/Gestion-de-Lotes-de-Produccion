@@ -1,10 +1,10 @@
-#Aqui solo es un solo contenedor por que no estamos usando base de datos externa
+#Awui solo es un solo servicio por que no estamos usando base de datos externa si no que usamos SQLite
 services:
-  usuarios_app:
-    build: . #Contruimos en base la carpeta actual
-    container_name: usuarios_app #Nombre del contenedor
+  proveedor_app:
+    build: . #Construimos en base de la carpeta actual
+    container_name: proveedor_app #Nombre del contenedor
     ports:
-      - "8000:8000"
+      - "8002:8002"
     volumes:
       - .:/app #Volumen para almacenar los datos
     restart: always #Siempre se reinicia el contenedor si falla

@@ -1,14 +1,14 @@
 from django.http import JsonResponse
 from rest_framework import status
 
-#Clase Middleware para validar los headers
+# Clase Middleware para validar los headers
 class GatewayAuthMiddleware:
 
     # Constructor
-    def __init__(self, respuesta):
-        self.get_response = respuesta
+    def __init__(self, get_response):
+        self.get_response = get_response
 
-    # Funcion principal del middleware
+    # Metodos principal del middleware
     def __call__(self, request):
         print(f"HEADERS RECIBIDOS: {request.headers}")
         user_id = request.headers.get('X-User-ID', '').strip()
@@ -22,6 +22,7 @@ class GatewayAuthMiddleware:
         # Los inyectamos en el request para que puedan ser utilizados en las vistas
         request.user_id = user_id
         request.user_rol = user_rol
-        
+
         # Pasamos el request al siguiente middleware
         return self.get_response(request)
+
