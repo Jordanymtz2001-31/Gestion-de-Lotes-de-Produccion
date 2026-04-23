@@ -15,6 +15,7 @@ class LoteViewSet(viewsets.ModelViewSet):
 
     permission_classes = [AllowAny]
 
+    # Metodo para crear un lote para el operador y admin
     def create(self, request, *args, **kwargs):
         # Solo operador y admin pueden crear lotes
         if request.user_rol not in ["OPERADOR", "ADMIN"]:
@@ -24,7 +25,7 @@ class LoteViewSet(viewsets.ModelViewSet):
         # Obtenemos los ids de producto y proveedor del cuerpo de la solicitud
         producto_id = request.data.get('producto_id')
         proveedor_id = request.data.get('proveedor_id')
-        cantidad_actual = request.data.get('cantidad_actual')
+        #cantidad_inicial = request.data.get('cantidad_inicial')
 
         # Headers que necesitan los otros servicios para pasar el middleware
         user_headers = {

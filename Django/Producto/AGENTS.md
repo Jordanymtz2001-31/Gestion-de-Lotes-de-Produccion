@@ -40,7 +40,69 @@ Seguir las prácticas del skill `django-expert`:
 - CBV sobre FBV
 - select_related/prefetch_related para optimizar queries
 
+## Configuración para API Gateway
+
+### Rutas requeridas en nginx.conf
+
+Agregar la siguiente configuración en `Django/Api_Gateway/nginx.conf`:
+
+```nginx
+# Producto Service
+location /producto/ {
+    proxy_pass http://producto_app:8000/producto/;
+    proxy_set_header Host localhost;
+    proxy_set_header X-Real-IP $remote_addr;
+}
+```
+
+### URLs del proyecto
+
+En `Django/Producto/Producto/urls.py`, incluir las rutas de la API:
+
+```python
+from django.urls import path, include
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('producto/', include('api.urls')),
+]
+```
+
+### Configuración de Django
+
+En `Django/Producto/Producto/settings.py`:
+
+```python
+ALLOWED_HOSTS = ['localhost', 'producto_app', 'gateway']
+```
+
+### Archivo de rutas API
+
+Crear `Django/Producto/api/urls.py`:
+
+```python
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import ProductoViewSet
+
+router = DefaultRouter()
+router.register(r'', ProductoViewSet, basename='producto')
+
+urlpatterns = [
+    path('producto/', include(router.urls)),
+]
+```
+
+### Headers trustados
+
+El servicio recibe los siguientes headers del API Gateway:
+- `X-User-ID`: ID del usuario autenticado
+- `X-User-Rol`: Rol del usuario (admin, operador, supervisor)
+
+El middleware `GatewayAuthMiddleware` en `api/middleware.py` valida que estos headers estén presentes.
+
 ## Referencias
 
 - Ver AGENTS.md raíz para flujo de negocio completo
 - skill django-expert: `.agents/skills/django-expert/SKILL.md`
+- API Gateway: `../Api_Gateway/AGENTS.md`

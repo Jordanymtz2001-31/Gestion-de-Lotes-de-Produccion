@@ -16,7 +16,7 @@ class Producto(models.Model):
     codigo = models.CharField(max_length=12, unique=True, null=False, blank=False)
     descripcion = models.TextField(null=True, blank=True)
     unidad_medida = models.CharField(max_length=20, null=False, blank=False)
-    stock_actual = models.PositiveIntegerField(max_digits=10,
+    stock_actual = models.DecimalField(max_digits=10,
                                                 decimal_places=2,
                                                 default=0,
                                                 null=False,

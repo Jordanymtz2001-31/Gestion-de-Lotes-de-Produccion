@@ -1,0 +1,16 @@
+#Aqui solo es un servicio por que no estamos usando base de datos externa si no que usamos SQLite
+services:
+  inventario_app:
+    build: . #Construimos en base de la carpeta actual
+    container_name: inventario_app #Nombre del contenedor
+    ports:
+      - "8003:8003"
+    volumes:
+      - .:/app #Volumen para almacenar los datos
+    restart: always #Siempre se reinicia el contenedor si falla
+    networks:
+      - gestion_lote_net
+
+networks:
+  gestion_lote_net:
+    external: true #Red externa (que ya esta creada)

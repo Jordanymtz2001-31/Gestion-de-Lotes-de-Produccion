@@ -27,8 +27,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 #Copiamos el codigo de la aplicacion al contenedor
 COPY . .
 
-#Exponemos el puerto 8002 en el que corre la aplicacion
-EXPOSE 8002
+#Exponemos el puerto 8003 en el que corre la aplicacion
+EXPOSE 8003
 
 #Comando para iniciar la aplicacion
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8002"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8003"]
