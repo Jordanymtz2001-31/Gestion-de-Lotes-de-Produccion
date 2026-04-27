@@ -1,0 +1,30 @@
+# Git
+.git
+.gitignore
+
+# Python - Archivos temporales y caché (Ahorra mucho espacio)
+__pycache__/
+*.py[cod]
+*$py.class
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Django - Archivos locales y base de datos de prueba
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Otros - Basura del sistema o logs
+*.log
+.DS_Store (si usas Mac)
+.vscode/
+.idea/

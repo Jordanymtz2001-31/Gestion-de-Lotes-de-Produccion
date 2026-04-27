@@ -1,12 +1,13 @@
 #Awui solo es un solo servicio por que no estamos usando base de datos externa si no que usamos SQLite
 services:
   proveedor_app:
-    build: . #Construimos en base de la carpeta actual
+    image: jordany31/proveedor_app:dev #nombre de la imagen para dockerhub
+    build: . #Construimos en base de la carpeta actual (De forma local)
     container_name: proveedor_app #Nombre del contenedor
     ports:
       - "8002:8002"
     volumes:
-      - .:/app #Volumen para almacenar los datos
+      - .:/db.sqlite3:/app/db.sqlite3 #Volumen para almacenar los datos
     restart: always #Siempre se reinicia el contenedor si falla
     networks:
       - gestion_lote_net

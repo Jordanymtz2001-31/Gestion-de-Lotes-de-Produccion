@@ -1,12 +1,14 @@
 #Aqui solo es un solo contenedor por que no estamos usando base de datos externa
 services:
   usuarios_app:
-    build: . #Contruimos en base la carpeta actual
+    image: jordany31/usuarios_app:dev #nombre de la imagen para dockerhub
+    build: . #Contruimos en base la carpeta actual (De forma local)
     container_name: usuarios_app #Nombre del contenedor
     ports:
       - "8000:8000"
     volumes:
-      - .:/app #Volumen para almacenar los datos
+      # Esto asegura que los datos nose borre al bajar el contenedor
+      - .:/db.sqlite3:/app/db.sqlite3 #Volumen para almacenar los datos
     restart: always #Siempre se reinicia el contenedor si falla
     networks:
       - gestion_lote_net

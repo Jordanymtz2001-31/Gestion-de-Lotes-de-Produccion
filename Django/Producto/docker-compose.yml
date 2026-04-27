@@ -8,7 +8,7 @@ services:
     environment:
       MYSQL_DATABASE: producto_db #Nombre de la base de datos
       MYSQL_USER: Dany #Usuario de la base de datos
-      MYSQL_ROOT_PASSWORD: root #Contraseña de la base de datos
+      MYSQL_ROOT_PASSWORD: Dany #Contraseña de la base de datos
       MYSQL_PASSWORD: 12345678j #Contraseña de la base de datos
     ports:
       - "3307:3306" #Puerto para acceder a la base de datos
@@ -16,7 +16,7 @@ services:
       - mysql_producto_data:/var/lib/mysql #Volumen para almacenar los datos
     healthcheck:
       test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "Dany", "-p12345678j" ] #Comando para verificar la salud del contenedor
-      interval: 30s #Intervalo de verificacion
+      interval: 10s #Intervalo de verificacion
       timeout: 10s #Tiempo de espera
       retries: 3 #Reintentos de verificacion
       start_period: 60s #Tiempo de espera inicial el contenedor
@@ -25,14 +25,16 @@ services:
 
   # Segundo Contenedor
   producto_app:
-    build: . #Contruimos en base la carpeta actual
+    image: jordany31/producto_app:dev #nombre de la imagen para dockerhub
+    build: . #Contruimos en base la carpeta actual (De forma local)
     container_name: producto_app #Nombre del contenedor
+    #command: python manage.py runserver 0.0.0.0:8001 de forma local
+    #command: gunicorn --bind 0.0.0.0:8001 Producto.wsgi:application de forma para docker hub
     command: >
-      sh -c "python manage.py makemigrations &&
-             python manage.py migrate &&
-             python manage.py runserver 0.0.0.0:8001"
-    volumes:
-      - .:/app #Volumen para almacenar los datos
+      sh -c "python manage.py migrate &&
+             gunicorn --bind 0.0.0.0:8001 Producto.wsgi:application"
+    #volumes:
+    #  - .:/app #Volumen para almacenar los datos (De forma local)
     ports:
       - "8001:8001"
     depends_on:

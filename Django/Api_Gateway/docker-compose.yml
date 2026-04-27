@@ -1,12 +1,14 @@
 #Contenedor para la API Gateway
 services:
   nginx:
-    image: nginx:latest #Aqui se utiliza la ultima version de nginx
+    build: . # Carpeta donde este el Dockerfile del nginx
+    #image: nginx:latest #Aqui se utiliza la ultima version de nginx 
+    image: jordany31/api-gateway:dev # Ahorra mas almacenamiento con esta configuracion
     container_name: gateway #Nombre del contenedor
     ports:
       - "8080:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro #Volumen para almacenar el archivo de configuracion de nginx
+    #volumes:
+    #  - ./nginx.conf:/etc/nginx/nginx.conf:ro #Volumen para almacenar el archivo de configuracion de nginx de forma local para mi
     networks:
       - gestion_lote_net
 
