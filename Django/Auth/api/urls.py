@@ -3,7 +3,7 @@ from api import views
 from django.urls import path, include
 
 router = DefaultRouter()
-router.register(r'usuarios', views.UsuarioViewSet, basename='usuario')
+router.register(r'', views.UsuarioViewSet, basename='usuario')
 
 urlpatterns = [
         path('login/', views.LoginView.as_view(), name='login'),

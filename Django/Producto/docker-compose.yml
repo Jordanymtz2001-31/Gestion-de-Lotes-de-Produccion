@@ -29,10 +29,9 @@ services:
     build: . #Contruimos en base la carpeta actual (De forma local)
     container_name: producto_app #Nombre del contenedor
     #command: python manage.py runserver 0.0.0.0:8001 de forma local
-    #command: gunicorn --bind 0.0.0.0:8001 Producto.wsgi:application de forma para docker hub
+    #command: sh -c "python manage.py migrate && gunicorn --bind 0.0.0.0:8001 Producto.wsgi:application de forma para docker hub
     command: >
-      sh -c "python manage.py migrate &&
-             gunicorn --bind 0.0.0.0:8001 Producto.wsgi:application"
+            python manage.py runserver 0.0.0.0:8001
     #volumes:
     #  - .:/app #Volumen para almacenar los datos (De forma local)
     ports:

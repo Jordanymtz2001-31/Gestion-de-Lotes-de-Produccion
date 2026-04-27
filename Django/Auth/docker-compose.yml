@@ -7,8 +7,10 @@ services:
     ports:
       - "8000:8000"
     volumes:
+    # Le damos permisos de lectura y escritura en nuestro contenedor y asi crear el archivo SQLite
+      - .:/app #Volumen para almacenar los datos en desarrollo
       # Esto asegura que los datos nose borre al bajar el contenedor
-      - .:/db.sqlite3:/app/db.sqlite3 #Volumen para almacenar los datos
+      #- .:/db.sqlite3:/api/db.sqlite3 #Volumen para almacenar los datos
     restart: always #Siempre se reinicia el contenedor si falla
     networks:
       - gestion_lote_net

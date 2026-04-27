@@ -36,8 +36,8 @@ COPY . .
 EXPOSE 8002
 
 # Ejecutamos migraciones antes de arrancar para asegurar que la DB exista
-CMD ["sh", "-c", "python manage.py migrate && gunicorn --bind 0.0.0.0:8002 Proveedor.wsgi.application"]
+#CMD ["sh", "-c", "python manage.py migrate && gunicorn --bind 0.0.0.0:8002 Proveedor.wsgi.application"]
 
 
 #Comando para iniciar la aplicacion
-#CMD ["python", "manage.py", "runserver", "0.0.0.0:8002"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8002"]

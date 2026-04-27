@@ -15,7 +15,12 @@ class Producto(models.Model):
     nombre = models.CharField(max_length=50, null=False, blank=False)
     codigo = models.CharField(max_length=12, unique=True, null=False, blank=False)
     descripcion = models.TextField(null=True, blank=True)
-    unidad_medida = models.CharField(max_length=20, null=False, blank=False)
+    UNIDAD_MEDIDA = [
+        ('METRO', 'Metro'),
+        ('KG', 'Kilogramo'),
+        ('ROLLO', 'Rollo')
+    ]
+    unidad_medida = models.CharField(max_length=20, choices=UNIDAD_MEDIDA, null=False, blank=False)
     stock_actual = models.DecimalField(max_digits=10,
                                                 decimal_places=2,
                                                 default=0,

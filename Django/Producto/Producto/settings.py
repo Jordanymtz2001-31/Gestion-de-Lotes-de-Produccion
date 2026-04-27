@@ -41,6 +41,11 @@ INSTALLED_APPS = [
     'rest_framework',
 ]
 
+REST_FRAMEWORK = {
+    #Indicamos que usaremos nuestro propio manejador de exepciones personalizado de manera global
+    'EXCEPTION_HANDLER': 'api.exceptions.custom_exception_handler',
+}
+
 """ NO USAMOS ESTE NI EN LOS DENAS SERVICIOS POR QUE ESTAMOS UTILIZANDO EL API GATEWAY
 CORS_ALLOW_ALL_ORIGINS = [
     "http://localhost:4200", # Dominio del Frontend
@@ -116,7 +121,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es-mx'
 
 TIME_ZONE = 'UTC'
 

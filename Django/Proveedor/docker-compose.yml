@@ -7,7 +7,7 @@ services:
     ports:
       - "8002:8002"
     volumes:
-      - .:/db.sqlite3:/app/db.sqlite3 #Volumen para almacenar los datos
+      - .:/app #Volumen para almacenar los datos
     restart: always #Siempre se reinicia el contenedor si falla
     networks:
       - gestion_lote_net

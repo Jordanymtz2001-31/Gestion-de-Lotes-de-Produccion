@@ -36,7 +36,7 @@ COPY . .
 EXPOSE 8003
 
 # Ejecutamos migraciones antes de arrancar para asegurar que la DB exista
-CMD ["sh", "-c", "python manage.py migrate && gunicorn --bind 0.0.0.0:8003 Inventario.wsgi.application"]
+#CMD ["sh", "-c", "python manage.py migrate && gunicorn --bind 0.0.0.0:8003 Inventario.wsgi.application"]
 
 #Comando para iniciar la aplicacion
-#CMD ["python", "manage.py", "runserver", "0.0.0.0:8003"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8003"]

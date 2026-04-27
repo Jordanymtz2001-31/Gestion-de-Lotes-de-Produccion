@@ -18,7 +18,7 @@ class UsuarioViewSet(viewsets.ModelViewSet):
     serializer_class = UsuarioSerializer
 
     #Definimos permisos
-    permission_classes = [IsAuthenticated, Is_Admin]
+    permission_classes = [Is_Admin]
 
     """
     #Metodo para crear un usuario nuevo
@@ -40,6 +40,7 @@ class UsuarioViewSet(viewsets.ModelViewSet):
 # Clase para la vista de inicio de sesión
 class LoginView(APIView):
     permission_classes = [AllowAny]
+    #authentication_classes = []      # Evita que DRF intente autenticar
 
     def post(self, request):
         serializer = LoginSerializer(data=request.data) # Recibe los datos del formulario
@@ -73,7 +74,8 @@ class LoginView(APIView):
         #return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # Vista para verificar token y exponer headers usados por nginx (X-User-ID, X-User-Rol)
-class VerifyView(APIView):#
+class VerifyView(APIView):
+    #authentication_classes = []
     permission_classes = [AllowAny] #Colocamos permiso para cualquier ya que Nginx lo usara (NO ES USUARIO)
 
     #Creamos dos metodos que estaran expuestos

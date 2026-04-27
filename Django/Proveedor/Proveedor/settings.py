@@ -41,6 +41,11 @@ INSTALLED_APPS = [
     'rest_framework',
 ]
 
+REST_FRAMEWORK = {
+    #Indicamos que usaremos nuestro propio manejador de exepciones personalizado de manera global
+    'EXCEPTION_HANDLER': 'api.exceptions.custom_exception_handler',
+}
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -105,7 +110,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es-mx'
 
 TIME_ZONE = 'UTC'
 

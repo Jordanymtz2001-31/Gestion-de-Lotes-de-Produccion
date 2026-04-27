@@ -54,5 +54,7 @@ ENV PYTHONUNBUFFERED=1
 EXPOSE 8001
 
 #Comando para iniciar la aplicacion
-CMD ["gunicorn", "--bind", "0.0.0.0:8001", "Producto.wsgi.application"]
-# Forma local CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+#CMD ["gunicorn", "--bind", "0.0.0.0:8001", "Producto.wsgi.application"]
+
+#Comando para iniciar la aplicacion en modo desarrollo
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8001"]
