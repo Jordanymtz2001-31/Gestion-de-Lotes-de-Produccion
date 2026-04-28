@@ -4,13 +4,15 @@ from rest_framework import status
 #Clase Middleware para validar los headers
 class GatewayAuthMiddleware:
 
-    # Constructor
+    # Constructor para inicializar el middleware
     def __init__(self, respuesta):
         self.get_response = respuesta
 
     # Funcion principal del middleware
     def __call__(self, request):
-        print(f"HEADERS RECIBIDOS: {request.headers}")
+        print(f"[PRODUCTO] PATH: {request.path}")
+        print(f"[PRODUCTO] X-User-ID: {request.headers.get('X-User-ID')}")
+        print(f"[PRODUCTO] X-User-Rol: {request.headers.get('X-User-Rol')}")
         user_id = request.headers.get('X-User-ID', '').strip()
         user_rol = request.headers.get('X-User-Rol', '').strip()
 

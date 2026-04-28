@@ -13,10 +13,11 @@ def verificar_producto(producto_id, user_headers):
     del servicio destino no rechace la peticion
     """
     url = f"{PRODUCTO_URL}/productos/{producto_id}/"
-
+    print(f"URL: {url}") 
+    print(f"HEADERS RECIBIDOS: {user_headers}")
     try:
         existe_producto = requests.get(url, headers=user_headers, timeout=5)
-        
+        print(f"ENVIADOS: {existe_producto.text}") 
         # Lanza una exceptcion si el status code es 400 o 500
         existe_producto.raise_for_status()
         # Devolvos el producto en caso de que exista

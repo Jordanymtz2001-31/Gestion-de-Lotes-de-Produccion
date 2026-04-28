@@ -30,7 +30,8 @@ class LoteViewSet(viewsets.ModelViewSet):
         # Headers que necesitan los otros servicios para pasar el middleware
         user_headers = {
             'X-User-ID': request.user_id,
-            'X-User-Rol': request.user_rol
+            'X-User-Rol': request.user_rol,
+            'Host' : 'localhost' #Tenemos que pasarle el host que crea la libreria requests automaticamente de lo contrario da error
         }
 
         # Verificamos que el producto existe

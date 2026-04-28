@@ -9,11 +9,11 @@ class Lote(models.Model):
     producto_id = models.PositiveIntegerField(null=False, blank=False)
     proveedor_id = models.PositiveIntegerField(null=False, blank=False)
     cantidad_inicial = models.DecimalField(max_digits=10, decimal_places=2, null=False, blank=False) # La cantidad que llega en el lote
-    cantidad_actual = models.DecimalField(max_digits=10, decimal_places=2, null=False, blank=False) # Para ir disminullendo en cada salida de cada lote
+    cantidad_actual = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True) # Para ir disminullendo en cada salida de cada lote
     fecha_produccion = models.DateField(null=False, blank=False)
     fecha_entrada = models.DateTimeField(auto_now_add=True)
     ESTADO = [
-        ("REVICION", "Revisión"),
+        ("REVISION", "Revisión"),
         ("APROBADO", "Aprobado"),
         ("RECHAZADO", "Rechazado"),
         ("AGOTADO", "Agotado"),

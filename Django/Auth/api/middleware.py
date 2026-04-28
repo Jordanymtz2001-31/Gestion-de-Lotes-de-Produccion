@@ -3,7 +3,8 @@ from rest_framework import status
 
 # Definimos rutas publicas que no requieren autenticacion
 RUTAS_PUBLICAS = ['/health/', '/usuario/login/', '/usuario/verify/']
-# Clase Middleware para validar los headers
+
+# Clase Middleware para validar los headers de la peticion en donde se pasa el token (X-User-ID y X-User-Rol)
 class GatewayAuthMiddleware:
 
     # Constructor
@@ -33,6 +34,6 @@ class GatewayAuthMiddleware:
         request.user_id = user_id
         request.user_rol = user_rol
 
-        # Pasamos el request al siguiente middleware
+        # Pasamos la peticion
         return self.get_response(request)
 

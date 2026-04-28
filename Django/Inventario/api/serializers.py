@@ -4,4 +4,5 @@ from .models import Lote
 class LoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lote
-        fields = '__all__'  
+        fields = '__all__' 
+        read_only_fields = ['fecha_entrada'] # Solo lectura
