@@ -77,7 +77,7 @@ class LoteViewSet(viewsets.ModelViewSet):
 
             # Obtenemos el stock actual del producto y le pasamos el id del producto
             producto = verificar_producto(lote.producto_id, user_headers)
-            if not producto['valido']:
+            if not producto['Valido']:
                 return Response({'error': producto['error']}, status=status.HTTP_400_BAD_REQUEST)
 
             # Sumamos la cantidad del lote al stock del producto
@@ -88,7 +88,7 @@ class LoteViewSet(viewsets.ModelViewSet):
                 user_headers # Le pasamos los headers
             )
 
-            if not actualizacion['valido']:
+            if not actualizacion['Valido']:
                 return Response(
                     {'error': f"No se pudo actualizar el stock: {actualizacion['error']}"},
                     status=status.HTTP_400_BAD_REQUEST

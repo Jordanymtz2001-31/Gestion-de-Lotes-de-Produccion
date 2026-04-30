@@ -4,26 +4,27 @@ from rest_framework import status
 #Clase Middleware para validad los headers
 class GatewayAuthMiddleware:
 
-    #Contructor
+    # Constructor para instanciar una sola ves el middleware al ejecutar
+    # y esperar peticiones
     def __init__(self, respuesta):
         self.get_response = respuesta
 
-    # Funcion principal del middleware
+    # Por cada peticion que llega, django llama a este metodo
     def __call__(self, request):
         print(f"HEADERS RECIBIDOS: {request.headers}")
         
         # Obtenemos el id y rol del headers
-        user_id = request.headers.get('X-User-ID', '').strip()
-        user_rol = request.headers.get('X-User-Rol', '').strip()
+        usuario_id = request.headers.get('X-User-ID', '').strip()
+        usuario_rol = request.headers.get('X-User-Rol', '').strip()
 
         # Validamos
         # Si no vienen los headers, si la peticion no paso por el Api Gateway
-        if not user_id or not user_rol:
+        if not usuario_id or not usuario_rol:
             return JsonResponse({'error': 'Acceso denegado'}, status=status.HTTP_401_UNAUTHORIZED)
         
         # Los inteyactamos en el request para que puedan ser utilizados en las vistas
-        request.user_id = user_id
-        request.user_rol = user_rol
+        request.user_id = usuario_id
+        request.user_rol = usuario_rol
 
-        # Pasamos el request al siguiente middleware
+        # Pasamos la peticion a la vista
         return self.get_response(request)

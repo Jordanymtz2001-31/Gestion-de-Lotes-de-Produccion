@@ -7,12 +7,13 @@ RUTAS_PUBLICAS = ['/health/', '/usuario/login/', '/usuario/verify/']
 # Clase Middleware para validar los headers de la peticion en donde se pasa el token (X-User-ID y X-User-Rol)
 class GatewayAuthMiddleware:
 
-    # Constructor
+    # Constructor para instanciar una sola ves el middleware al ejecutar
+    # y esperar peticiones
     def __init__(self, get_response):
         
         self.get_response = get_response
 
-    # Metodos principal del middleware
+    # Por cada peticion que llega, django llama a este metodo
     def __call__(self, request):
         print(f"HEADERS RECIBIDOS: {request.headers}")
         print(f"PATH: {request.path}")          
@@ -22,18 +23,18 @@ class GatewayAuthMiddleware:
         if request.path in RUTAS_PUBLICAS:
             return self.get_response(request) # Pasamos el request al siguiente middleware
         
-        user_id = request.headers.get('X-User-ID', '').strip()
-        user_rol = request.headers.get('X-User-Rol', '').strip()
+        usuario_id = request.headers.get('X-User-ID', '').strip()
+        usuario_rol = request.headers.get('X-User-Rol', '').strip()
 
         # Validamos
         # Si no vienen los headers, si la peticion no paso por el API Gateway
-        if not user_id or not user_rol:
+        if not usuario_id or not usuario_rol:
             return JsonResponse({'error': 'Acceso denegado'}, status=status.HTTP_401_UNAUTHORIZED)
 
         # Los inyectamos en el request para que puedan ser utilizados en las vistas
-        request.user_id = user_id
-        request.user_rol = user_rol
+        request.user_id = usuario_id 
+        request.user_rol = usuario_rol
 
-        # Pasamos la peticion
+        # Pasamos la peticion a la vista
         return self.get_response(request)
 

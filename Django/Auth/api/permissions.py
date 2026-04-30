@@ -33,7 +33,7 @@ class Is_Admin(BasePermission):
             return False
         return (getattr(user, 'rol', '') or '').upper() == 'ADMIN'
 """
-
+"""
 class Is_Operador(BasePermission):
     def has_permission(self, request, view):
         return (request.headers.get('X-User-Rol', '') or '').upper() == 'OPERADOR'
@@ -42,7 +42,7 @@ class Is_Operador(BasePermission):
 class Is_Supervisor(BasePermission):
     def has_permission(self, request, view):
         return (request.headers.get('X-User-Rol', '') or '').upper() == 'SUPERVISOR'
-
+"""
 
 class Is_Admin(BasePermission):
     def has_permission(self, request, view):
