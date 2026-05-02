@@ -94,12 +94,11 @@ urlpatterns = [
 ```
 
 ### Headers trustados
-
 El servicio recibe los siguientes headers del API Gateway:
 - `X-User-ID`: ID del usuario autenticado
 - `X-User-Rol`: Rol del usuario (admin, operador, supervisor)
 
-El middleware `GatewayAuthMiddleware` en `api/middleware.py` valida que estos headers estén presentes.
+El middleware `GatewayAuthMiddleware` en `api/middleware.py` valida que estos headers estén presentes e inyecta `request.user_rol`.
 
 ## Referencias
 

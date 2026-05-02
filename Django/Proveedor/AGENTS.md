@@ -98,19 +98,20 @@ class Proveedor(models.Model):
 ## 5. Configuración
 
 ### Settings
-
-El servicio usa configuración estándar Django:
+El servicio usa:
 - Puerto: 8002
-- Base de datos: PostgreSQL (compartida)
+- Base de datos: SQLite (desarrollo)
 - Serializers: DRF ModelSerializer
-- Permisos: AllowAny (público)
+- Permisos: `IsAuthenticated` (base)
+- Middleware: `GatewayAuthMiddleware` (inyecta `user_id` y `user_rol` desde headers trustados)
 
 ### Middleware
 
 ```python
 # api/middleware.py
-class CustomCorsMiddleware:
-    # Configuración CORS para permitir peticiones del frontend
+class GatewayAuthMiddleware:
+    # Valida que existan X-User-ID y X-User-Rol
+    # Inyecta request.user_id y request.user_rol
 ```
 
 ---
@@ -154,9 +155,7 @@ python manage.py runserver 0.0.0.0:8002
 ---
 
 ## 8. Pendientes y Mejoras
-
-- [ ] Implementar autenticación (AllowAny → IsAuthenticated)
 - [ ] Agregar validaciones adicionales en serializer
 - [ ] Agregar filtrado por nombre/email
 - [ ] Implementar paginación personalizada
-- [ ] Agregar logs de auditoría para creaciones/modificaciones
+- [ ] Agregar logs de auditoría

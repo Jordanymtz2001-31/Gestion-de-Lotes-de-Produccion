@@ -1,7 +1,7 @@
 from rest_framework import viewsets
 from .serializers import ProveedorSerializer
 from api.models import Proveedor
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from rest_framework.response import Response
 
@@ -9,8 +9,6 @@ from rest_framework.response import Response
 class ProveedorViewSet(viewsets.ModelViewSet):
     queryset = Proveedor.objects.all()
     serializer_class = ProveedorSerializer
-
-    permission_classes = [AllowAny]
 
     #Metodo para crear un proveedor pero solo admin
     def create(self, request, *args, **kwargs):

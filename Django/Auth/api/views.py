@@ -1,7 +1,7 @@
 from rest_framework import viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny
 from rest_framework.exceptions import AuthenticationFailed, ValidationError
 from rest_framework_simplejwt.backends import TokenBackend
 from rest_framework import status
@@ -93,8 +93,8 @@ class VerifyView(APIView):
         # Obtenemos el token del header y lo limpiamos el prefijo Bearer
         token = request.headers.get('Authorization', '').replace('Bearer ', '').strip()
 
-        if not token: # Si el token no existe
-            return JsonResponse({}, status=status.HTTP_401_UNAUTHORIZED) # Retornamos un error
+        if not token: # Si el token no existe es decir que no se logueo
+            return JsonResponse({'error': 'Acceso denegado'}, status=status.HTTP_401_UNAUTHORIZED) # Retornamos un error
 
         try:
             # Primero decodificamos el token con ayuda de TokenBackend de rest_framework_simplejwt

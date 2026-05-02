@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Lote
 from .serializers import LoteSerializer
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated
 from rest_framework import viewsets
 from api.services import verificar_producto, verificar_proveedor
 
@@ -12,8 +12,6 @@ from api.services import verificar_producto, verificar_proveedor
 class LoteViewSet(viewsets.ModelViewSet):
     queryset = Lote.objects.all()
     serializer_class = LoteSerializer
-
-    permission_classes = [AllowAny]
 
     # Metodo para crear un lote para el operador y admin
     def create(self, request, *args, **kwargs):

@@ -124,11 +124,13 @@ user_headers = {
 
 ## Permisos por rol
 
-| Rol | Permisos |
-|-----|----------|
-| ADMIN | CRUD completo, aprobar/rechazar lotes |
-| OPERADOR | Crear lotes, registrar movimientos |
-| SUPERVISOR | Aprobar/rechazar lotes |
+| Rol | Listar/Ver | Crear Lote | Cambiar Estado | Movimientos |
+|-----|------------|-----------|---------------|--------------|
+| ADMIN | ✅ | ✅ | ✅ | ✅ |
+| OPERADOR | ✅ | ✅ | ❌ | ✅ |
+| SUPERVISOR | ✅ | ❌ | ✅ | ✅ |
+
+**Nota:** Los lotes NO se eliminan. Cuando un lote no cumple estándares, se cambia su estado a `RECHAZADO` y se genera un reporte de calidad como evidencia.
 
 ## Custom Managers
 
