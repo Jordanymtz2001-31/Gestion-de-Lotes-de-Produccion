@@ -64,14 +64,22 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # Angular
+.angular/
 .angular/cache
+.angular/cache.json
 .cache/
 dist/
 tmp/
 out-tsc/
 e2e/
+coverage/
+
+# Entornos locales Angular
+environment.ts
+environment.*.ts
 
 # build/ carpeta de compilación Angular
+build/
 
 # IDEs
 .vscode/
@@ -117,3 +125,10 @@ coverage.xml
 .agents/
 skills-lock.json
 .kiro/
+
+# Firebase (si usas)
+.firebase/
+firebase-debug.log*
+
+# Storybook (si usas)
+storybook-static/
