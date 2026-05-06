@@ -7,13 +7,13 @@ RUTAS_PUBLICAS = ['/health/', '/usuario/login/', '/usuario/verify/']
 # Clase Middleware para validar los headers de la peticion en donde se pasa el token (X-User-ID y X-User-Rol)
 class GatewayAuthMiddleware:
 
-    # Constructor para instanciar una sola ves el middleware al ejecutar
+    # Constructor para instanciar una sola ves el middleware al ejecutar el servidor
     # y esperar peticiones
     def __init__(self, get_response):
         
         self.get_response = get_response
 
-    # Por cada peticion que llega, django llama a este metodo
+    # Por cada peticion HTTP que llega, django llama a este metodo
     def __call__(self, request):
         print(f"HEADERS RECIBIDOS: {request.headers}")
         print(f"PATH: {request.path}")          
