@@ -44,7 +44,7 @@ export const routes: Routes = [
     {path: 'listar-proveedores', canActivate: [authGuard], loadComponent: () => import('./features/proveedores/listar-pr/listar-pr').then(m => m.ListarPr)},
     {path: 'listar-productos', canActivate: [authGuard], loadComponent: () => import('./features/productos/listar-p/listar-p').then(m => m.ListarP)},
     {path: 'guardar-lote', canActivate: [authGuard], loadComponent: () => import('./features/lotes/guardar-l/guardar-l').then(m => m.GuardarL)},
-    {path: 'editar-lote', canActivate: [authGuard], loadComponent: () => import('./features/lotes/editar-l/editar-l').then(m => m.EditarL)},
+    //{path: 'editar-lote', canActivate: [authGuard], loadComponent: () => import('./features/lotes/editar-l/editar-l').then(m => m.EditarL)},
 
     //Solo admin puede pasar
     {path: 'listar-usuario', canActivate: [authGuard, adminGuard], loadComponent: () => import('./features/usuarios/listar-u/listar-u').then(m => m.ListarU)},

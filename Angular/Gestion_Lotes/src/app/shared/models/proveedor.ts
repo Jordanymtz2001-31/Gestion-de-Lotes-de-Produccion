@@ -1,2 +1,6 @@
-export class Proveedor {
+export interface Proveedor {
+    id: number;
+    nombre: string;
+    telefono: string;
+    email: string;
 }
