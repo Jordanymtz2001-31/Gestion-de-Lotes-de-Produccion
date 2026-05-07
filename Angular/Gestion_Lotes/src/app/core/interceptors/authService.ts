@@ -13,7 +13,7 @@ export class AuthService {
    * URL base del API (API Gateway). Se añade la barra final para facilitar
    * la concatenación de rutas como `${this.apiUrl}usuario/login/`.
    */
-  private apiUrl = 'http://localhost:8000/';
+  private apiUrl = 'http://localhost:8080/';
 
   /**
    * `Signal` que mantiene el usuario actualmente autenticado.

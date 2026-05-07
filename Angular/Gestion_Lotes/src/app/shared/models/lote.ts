@@ -7,5 +7,5 @@ export interface Lote {
     cantidad_actual: number;
     fecha_produccion: Date;
     fecha_entrada: Date;
-    estado: string;
+    estado: 'REVISION' | 'APROBADO' | 'RECHAZADO' | 'AGOTADO';
 }
