@@ -1,1 +1,89 @@
-<p>guardar-p works!</p>
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          <h4 class="mb-0">Nuevo Producto</h4>
+        </div>
+        <div class="card-body">
+          <form (ngSubmit)="onSubmit()">
+            <div class="mb-3">
+              <label for="codigo" class="form-label">Código *</label>
+              <input
+                type="text"
+                class="form-control"
+                id="codigo"
+                [(ngModel)]="productoDto.codigo"
+                name="codigo"
+                required
+                maxlength="12"
+                placeholder="Ej: PROD-001"/>
+            </div>
+
+            <div class="mb-3">
+              <label for="nombre" class="form-label">Nombre *</label>
+              <input
+                type="text"
+                class="form-control"
+                id="nombre"
+                [(ngModel)]="productoDto.nombre"
+                name="nombre"
+                required
+                maxlength="50"
+                placeholder="Nombre del producto"/>
+            </div>
+
+            <div class="mb-3">
+              <label for="descripcion" class="form-label">Descripción</label>
+              <textarea
+                class="form-control"
+                id="descripcion"
+                [(ngModel)]="productoDto.descripcion"
+                name="descripcion"
+                rows="3"
+                placeholder="Descripción opcional">
+              </textarea>
+            </div>
+
+            <div class="mb-3">
+              <label for="unidad_medida" class="form-label">Unidad de Medida *</label>
+              <select
+                class="form-select"
+                id="unidad_medida"
+                [(ngModel)]="productoDto.unidad_medida"
+                name="unidad_medida"
+                required>
+                @for (u of unidades; track u.value) {
+                <option [value]="u.value">
+                  {{ u.label}}
+                </option>
+                }
+              </select>
+            </div>
+
+            @if (error) {
+            <div class="alert alert-danger">{{ error }}</div>
+            }
+            @if (success) {
+            <div class="alert alert-success">{{ success }}</div>
+            }
+            <div class="d-flex justify-content-between">
+              <a routerLink="/listar-productos" class="btn btn-secondary">
+                Cancelar
+              </a>
+              <button
+                type="submit"
+                class="btn btn-primary"
+                [disabled]="loading">
+                @if (loading) {
+                  <span class="spinner-border spinner-borde r-sm me-2"> Guardar</span>
+                {{ loading ? 'Guardando...' : 'Guardar' }}
+                }
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

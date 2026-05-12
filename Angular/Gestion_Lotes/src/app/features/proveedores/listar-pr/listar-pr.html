@@ -1,1 +1,85 @@
-<p>listar-pr works!</p>
+<div class="container-fluid">
+  <!-- Page Header -->
+  <div class="page-header">
+    <h2>Proveedores</h2>
+    <a *ngIf="esAdmin" routerLink="/guardar-proveedor" class="btn btn-primary">
+      <i class="bi bi-plus-circle me-1"></i> Nuevo Proveedor
+    </a>
+  </div>
+
+  <!-- Search -->
+  <div class="search-container">
+    <input
+      type="text"
+      class="form-control search-input"
+      placeholder="Buscar por nombre o email..."
+      [(ngModel)]="busqueda"
+      (input)="filtrarProveedores()"
+    />
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner-border spinner-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+  <!-- Table -->
+  <div *ngIf="!loading && !error" class="table-container">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th style="width: 60px">ID</th>
+            <th>Nombre</th>
+            <th style="width: 140px">Teléfono</th>
+            <th>Email</th>
+            <th *ngIf="esAdmin" style="width: 100px">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let proveedor of proveedoresFiltrados">
+            <td class="text-muted">{{ proveedor.id }}</td>
+            <td class="fw-medium">{{ proveedor.nombre }}</td>
+            <td>
+              <i class="bi bi-telephone me-1 text-muted"></i>
+              {{ proveedor.telefono }}
+            </td>
+            <td>
+              <i class="bi bi-envelope me-1 text-muted"></i>
+              {{ proveedor.email }}
+            </td>
+            <td *ngIf="esAdmin">
+              <div class="btn-group-action">
+                <a
+                  [routerLink]="['/editar-proveedore', proveedor.id]"
+                  class="btn btn-action btn-outline-primary"
+                  title="Editar"
+                >
+                  <i class="bi bi-pencil"></i>
+                </a>
+                <button
+                  (click)="eliminarProveedor(proveedor.id)"
+                  class="btn btn-action btn-outline-danger"
+                  title="Eliminar"
+                >
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="proveedoresFiltrados.length === 0">
+            <td colspan="5" class="empty-state">
+              <i class="bi bi-inbox d-block mb-2" style="font-size: 2rem;"></i>
+              No hay proveedores registrados
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

@@ -1,1 +1,70 @@
-<p>login works!</p>
+<div class="login-container">
+  <div class="login-card">
+    <div class="text-center mb-4">
+      <h2 class="h3 mb-3 fw-normal">Textiles La Poblana</h2>
+      <p class="text-muted">Sistema de Gestión de Inventarios</p>
+    </div>
+
+    <form (ngSubmit)="onSubmit()" #loginForm="ngForm"> <!-- #loginForm="ngForm es una referencia al formulario-->
+      <div class="mb-3">
+        <label for="username" class="form-label">Usuario</label>
+        <input 
+          type="text" 
+          class="form-control" 
+          id="username" 
+          name="username"
+          [(ngModel)]="username"
+          required
+          placeholder="Ingrese su usuario"
+          #usernameInput="ngModel"
+        >
+        @if (usernameInput.invalid && usernameInput.touched) {
+        <div class="text-danger small mt-1">
+          El usuario es requerido
+        </div>
+        }
+      </div>
+
+      <div class="mb-3">
+        <label for="password" class="form-label">Contraseña</label>
+        <input 
+          type="password" 
+          class="form-control" 
+          id="password" 
+          name="password"
+          [(ngModel)]="password"
+          required
+          placeholder="Ingrese su contraseña"
+          #passwordInput="ngModel"
+        >
+        @if (passwordInput.invalid && passwordInput.touched) {
+        <div class="text-danger small mt-1">
+          La contraseña es requerida
+        </div>
+        }
+      </div>
+
+       @if (errorMessage) {
+      <div class="alert alert-danger py-2 mb-3">
+        {{ errorMessage }}
+      </div>
+      }
+
+      <button 
+        type="submit" 
+        class="btn btn-primary w-100 py-2"
+        [disabled]="!loginForm.valid || loading" 
+      > <!-- Desactivar el botón si el formulario no es válido o se está cargando -->
+
+        @if (loading) { <!-- Mostrar el indicador de carga -->
+        <span class="spinner-border spinner-border-sm me-2"></span>
+        }
+        {{ loading ? 'Iniciando sesión...' : 'Iniciar Sesión' }}
+      </button>
+    </form>
+
+    <div class="mt-4 text-center">
+      <small class="text-muted">© 2026 Textiles La Poblana</small>
+    </div>
+  </div>
+</div>

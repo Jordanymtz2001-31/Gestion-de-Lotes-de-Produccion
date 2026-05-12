@@ -1,1 +1,49 @@
-<p>buscar-pr works!</p>
+<div class="container py-4">
+  <h2 class="mb-4">Buscar Proveedores</h2>
+
+  <div class="mb-4">
+    <div class="input-group">
+      <input
+        type="text"
+        class="form-control"
+        placeholder="Ingrese nombre, email o teléfono..."
+        [(ngModel)]="termino"
+        (keyup.enter)="buscar()"
+      />
+      <button class="btn btn-primary" (click)="buscar()" [disabled]="loading">
+        <span *ngIf="loading" class="spinner-border spinner-border-sm"></span>
+        <span *ngIf="!loading">Buscar</span>
+      </button>
+      <button class="btn btn-secondary" (click)="limpiar()">Limpiar</button>
+    </div>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+  <div *ngIf="buscando && !loading" class="table-responsive">
+    <table class="table table-hover">
+      <thead class="table-dark">
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+          <th>Teléfono</th>
+          <th>Email</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let proveedor of resultados">
+          <td>{{ proveedor.id }}</td>
+          <td>{{ proveedor.nombre }}</td>
+          <td>{{ proveedor.telefono }}</td>
+          <td>{{ proveedor.email }}</td>
+        </tr>
+        <tr *ngIf="resultados.length === 0">
+          <td colspan="4" class="text-center text-muted py-4">
+            No se encontraron proveedores
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="text-muted">Resultados: {{ resultados.length }}</p>
+  </div>
+</div>

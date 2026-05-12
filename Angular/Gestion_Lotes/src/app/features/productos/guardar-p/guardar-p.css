@@ -1,0 +1,44 @@
+/* Form Container */
+.form-container {
+  padding: var(--space-6);
+}
+
+/* Card adjustments */
+.card {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.card-header {
+  padding: var(--space-4) var(--space-6);
+}
+
+.card-body {
+  padding: var(--space-6);
+}
+
+/* Form spacing */
+.form-group {
+  margin-bottom: var(--space-5);
+}
+
+.form-group:last-of-type {
+  margin-bottom: var(--space-6);
+}
+
+/* Form actions */
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--space-6);
+  padding-top: var(--space-5);
+  border-top: var(--border-subtle);
+}
+
+/* Help text */
+.form-text {
+  font-size: 0.8125rem;
+  color: var(--gray-500);
+  margin-top: var(--space-1);
+}

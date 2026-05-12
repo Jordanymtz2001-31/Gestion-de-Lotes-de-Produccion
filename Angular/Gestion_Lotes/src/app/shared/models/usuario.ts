@@ -24,9 +24,9 @@ export class Usuario {
 // Como es una interface TypeScript asume que todas las propiedades siemore tendran valores a menos que explicitamente le coloquemos ? para hacerlas opcionales
 // El ! solo existe en las clases por que como se deben inicializar en el constructor y sino le damos valores iniciales se queja mientras que en las interfaces no se inicializan
 
-//Solo describimos la estructura del objeto
+//Solo describimos la estructura del objeto y aqui son las propiedades que vamos a recibir del servidor
 export interface Usuario {
-    id: number;
+    id?: number; // El ID suele ser opcional porque el servidor lo genera
     username: string;
     email: string;
     rol: string;

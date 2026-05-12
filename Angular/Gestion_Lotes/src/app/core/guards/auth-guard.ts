@@ -21,7 +21,7 @@ export const adminGuard: CanActivateFn = () => {
   const authService = inject(AuthService); // Inyectamos el servicio de autenticación mediante la dependencia inject() sin usar el constructor
   const router = inject(Router); // Inyectamos el servicio de navegación mediante la dependencia inject() sin usar el constructor
 
-  if(authService.rol !== 'ADMIN'){  //Validamos que el rol sea admin
+  if(authService.rol === 'ADMIN'){  //Validamos que el rol sea admin
     return true;
   }
   router.navigate(['/dashboard']); // Si no es admin, redirigimos a la pantalla de dashboard

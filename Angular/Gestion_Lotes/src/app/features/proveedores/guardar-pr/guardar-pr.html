@@ -1,1 +1,72 @@
-<p>guardar-pr works!</p>
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          <h4 class="mb-0">Nuevo Proveedor</h4>
+        </div>
+        <div class="card-body">
+          <form (ngSubmit)="onSubmit()">
+            <div class="mb-3">
+              <label for="nombre" class="form-label">Nombre *</label>
+              <input
+                type="text"
+                class="form-control"
+                id="nombre"
+                [(ngModel)]="proveedor.nombre"
+                name="nombre"
+                required
+                maxlength="50"
+                placeholder="Nombre del proveedor"
+              />
+            </div>
+
+            <div class="mb-3">
+              <label for="telefono" class="form-label">Teléfono *</label>
+              <input
+                type="text"
+                class="form-control"
+                id="telefono"
+                [(ngModel)]="proveedor.telefono"
+                name="telefono"
+                required
+                maxlength="15"
+                placeholder="Ej: 5551234567"
+              />
+            </div>
+
+            <div class="mb-3">
+              <label for="email" class="form-label">Email *</label>
+              <input
+                type="email"
+                class="form-control"
+                id="email"
+                [(ngModel)]="proveedor.email"
+                name="email"
+                required
+                placeholder="email@proveedor.com"
+              />
+            </div>
+
+            <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+            <div *ngIf="success" class="alert alert-success">{{ success }}</div>
+
+            <div class="d-flex justify-content-between">
+              <a routerLink="/listar-proveedores" class="btn btn-secondary">
+                Cancelar
+              </a>
+              <button
+                type="submit"
+                class="btn btn-primary"
+                [disabled]="loading"
+              >
+                <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+                {{ loading ? 'Guardando...' : 'Guardar' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,5 +1,5 @@
 export interface Lote {
-    id: number;
+    id?: number; // El ID suele ser opcional porque el servidor lo genera
     codigo_lote: string;
     producto_id: number;
     proveedor_id: number;

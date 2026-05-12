@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { Login } from './features/auth/login/login';
+import { Dashboard } from './features/dashboard/dashboard';
 import { ListarU } from './features/usuarios/listar-u/listar-u';
 import { ListarP } from './features/productos/listar-p/listar-p';
 import { ListarPr } from './features/proveedores/listar-pr/listar-pr';
@@ -20,7 +21,7 @@ export const routes: Routes = [
     {path: '', redirectTo: '/login', pathMatch: 'full'},
     
     /* Ocupamos el loadComponent() (lazy) para importar el componente con la ventaja es que como solo va a dercargar el componente cuando lo necesitemos (velocidad)
-    De esta manera no cargamos todo la aplicacióny como existen usuarios por roles solo usaran ciertos componentes sin tener que descargar el resto
+    De esta manera no cargamos todo la aplicacióny como existen usuarios por roles solo usaran ciertos componentes sin tener que descargar el resto
     No todos los usuarios van a ver todos los componentes
     
     SEVE ALGO ASI EN LA PRACTICA
@@ -37,9 +38,13 @@ export const routes: Routes = [
     //login publico sin guard
     {path: 'login', loadComponent: () => import('./features/auth/login/login').then(m => m.Login)}, 
 
-    //Aqui definimos las rutas de la aplicación que utilizaremos en la navegación entre componentes de la aplicación
+    //dashboard con autenticacion
+    {path: 'dashboard', canActivate: [authGuard], loadComponent: () => import('./features/dashboard/dashboard').then(m => m.Dashboard)},
+    //{path: 'dashboard', component: Dashboard},
 
-    //Cual quier usuario con token puede pasar: ADMIN, OPERADOR, SUPERVISOR
+    //Aqui definimos las rutas de la aplicación que utilizaremos en la navegación entre componentes de la aplicación
+
+    //Cualquier usuario con token puede pasar: ADMIN, OPERADOR, SUPERVISOR
     {path: 'listar-lotes', canActivate: [authGuard], loadComponent: () => import('./features/lotes/listar-l/listar-l').then(m => m.ListarL)},
     {path: 'listar-proveedores', canActivate: [authGuard], loadComponent: () => import('./features/proveedores/listar-pr/listar-pr').then(m => m.ListarPr)},
     {path: 'listar-productos', canActivate: [authGuard], loadComponent: () => import('./features/productos/listar-p/listar-p').then(m => m.ListarP)},
@@ -47,28 +52,12 @@ export const routes: Routes = [
     //{path: 'editar-lote', canActivate: [authGuard], loadComponent: () => import('./features/lotes/editar-l/editar-l').then(m => m.EditarL)},
 
     //Solo admin puede pasar
-    {path: 'listar-usuario', canActivate: [authGuard, adminGuard], loadComponent: () => import('./features/usuarios/listar-u/listar-u').then(m => m.ListarU)},
+    {path: 'listar-usuarios', canActivate: [authGuard, adminGuard], loadComponent: () => import('./features/usuarios/listar-u/listar-u').then(m => m.ListarU)},
     {path: 'guardar-usuario', canActivate: [authGuard, adminGuard], loadComponent: () => import('./features/usuarios/guardar-u/guardar-u').then(m => m.GuardarU)},
     {path: 'guardar-producto', canActivate: [authGuard, adminGuard], loadComponent: () => import('./features/productos/guardar-p/guardar-p').then(m => m.GuardarP)},
     {path: 'guardar-proveedor', canActivate: [authGuard, adminGuard], loadComponent: () => import('./features/proveedores/guardar-pr/guardar-pr').then(m => m.GuardarPr)},
     {path: 'editar-usuario', canActivate: [authGuard, adminGuard], loadComponent: () => import('./features/usuarios/editar-u/editar-u').then(m => m.EditarU)},
-    {path: 'editar-producto', canActivate: [authGuard, adminGuard], loadComponent: () => import('./features/productos/editar-p/editar-p').then(m => m.EditarP)},
-    {path: 'editar-proveedore', canActivate: [authGuard, adminGuard], loadComponent: () => import('./features/proveedores/editar-pr/editar-pr').then(m => m.EditarPr)},
-    /*
-    {path: 'listar-usuario', component: ListarU},
-    {path: 'listar-productos', component: ListarP},
-    {path: 'listar-proveedores', component: ListarPr},
-    {path: 'listar-lotes', component: ListarL},
-
-    {path: 'guardar-usuario', component: GuardarU},
-    {path: 'guardar-producto', component: GuardarP},
-    {path: 'guardar-proveedore', component: GuardarPr},
-    {path: 'guardar-lote', component: GuardarL},
-
-    {path: 'editar-usuario', component: EditarU},
-    {path: 'editar-producto', component: EditarP},
-    {path: 'editar-proveedore', component: EditarPr},
-    */
-
+    {path: 'editar-producto/:id', canActivate: [authGuard, adminGuard], loadComponent: () => import('./features/productos/editar-p/editar-p').then(m => m.EditarP)},
+    {path: 'editar-proveedore/:id', canActivate: [authGuard, adminGuard], loadComponent: () => import('./features/proveedores/editar-pr/editar-pr').then(m => m.EditarPr)},
 
 ];

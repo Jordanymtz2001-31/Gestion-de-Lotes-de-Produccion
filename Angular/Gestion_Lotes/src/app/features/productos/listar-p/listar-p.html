@@ -1,1 +1,110 @@
-<p>listar-p works!</p>
+<div class="container-fluid">
+  <!-- Page Header -->
+  <div class="page-header">
+    <h2>Productos</h2>
+    @if (esAdmin) {
+    <a routerLink="/guardar-producto" class="btn btn-primary">
+      <i class="bi bi-plus-circle me-1"></i> Nuevo Producto
+    </a>
+    }
+  </div>
+
+  <!-- Search -->
+  <div class="search-container">
+    <input
+      type="text"
+      class="form-control search-input"
+      placeholder="Buscar por nombre o código..."
+      [(ngModel)]="busqueda"
+      (input)="filtrarProductos()"
+    />
+  </div>
+
+  <!-- Loading -->
+  @if (loading) {
+  <div class="loading-container">
+    <div class="spinner-border spinner-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+  }
+
+  <!-- Error -->
+  @if (error) { 
+  <div class="alert alert-danger">{{ error }}</div>
+  }
+
+  <!-- Table -->
+   @if (!loading && !error) {
+  <div class="table-container">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th style="width: 60px">ID</th>
+            <th style="width: 150px">Código</th>
+            <th>Nombre</th>
+            <th>Descripción</th>
+            <th style="width: 100px">Unidad</th>
+            <th style="width: 80px">Stock</th>
+            @if (esAdmin) {
+            <th style="width: 100px">Acciones</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (producto of productosFiltrados; track producto.id) {
+          <tr>
+            <td class="text-muted">{{ producto.id }}</td>
+            <td>
+              <code class="font-mono">{{ producto.codigo }}</code>
+            </td>
+            <td class="fw-medium">{{ producto.nombre }}</td>
+            <td class="text-muted">{{ producto.descripcion || '------------' }}</td>
+            <td>{{ producto.unidad_medida }}</td>
+            <td>
+              <span
+                class="badge"
+                [ngClass]="{
+                  'bg-success': producto.stock_actual > 10,
+                  'bg-warning text-dark': producto.stock_actual > 0 && producto.stock_actual <= 10,
+                  'bg-danger': producto.stock_actual === 0
+                }"
+              >
+                {{ producto.stock_actual }}
+              </span>
+            </td>
+            <td *ngIf="esAdmin">
+              <div class="btn-group-action">
+                <a
+                  [routerLink]="['/editar-producto', producto.id]"
+                  class="btn btn-action btn-outline-primary"
+                  title="Editar"
+                >
+                  <i class="bi bi-pencil"></i>
+                </a>
+                <button
+                  (click)="eliminarProducto(producto.id)"
+                  class="btn btn-action btn-outline-danger"
+                  title="Eliminar"
+                >
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          }
+          @if (productosFiltrados.length === 0) {
+          <tr>
+            <td colspan="7" class="empty-state">
+              <i class="bi bi-inbox d-block mb-2" style="font-size: 2rem;"></i>
+              No hay productos registrados
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+  }
+</div>

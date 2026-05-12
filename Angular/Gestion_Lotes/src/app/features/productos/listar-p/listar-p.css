@@ -1,0 +1,92 @@
+/* Page Container */
+.container-fluid {
+  padding: var(--space-6);
+}
+
+/* Page Header */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-4);
+  border-bottom: var(--border-subtle);
+}
+
+.page-header h2 {
+  margin: 0;
+  color: var(--gray-900);
+}
+
+/* Search Input */
+.search-container {
+  margin-bottom: var(--space-5);
+}
+
+.search-input {
+  max-width: 400px;
+  background-color: var(--surface-card);
+}
+
+/* Table Container */
+.table-container {
+  background: var(--surface-card);
+  border: var(--border-subtle);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+/* Loading State */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: var(--space-8);
+}
+
+.spinner-primary {
+  color: var(--primary-500);
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: var(--space-8);
+  color: var(--gray-500);
+}
+
+/* Action Buttons */
+.btn-group-action {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.btn-action {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+}
+
+.btn-action:hover {
+  transform: translateY(-1px);
+}
+
+/* Stock Badge Variants */
+.stock-high {
+  background-color: var(--success-100);
+  color: var(--success-600);
+}
+
+.stock-low {
+  background-color: var(--warning-100);
+  color: var(--warning-600);
+}
+
+.stock-empty {
+  background-color: var(--danger-100);
+  color: var(--danger-600);
+}

@@ -5,17 +5,18 @@ import { Usuario } from '../../shared/models/usuario';
 import { Observable } from 'rxjs';
 import { Proveedor } from '../../shared/models/proveedor';
 import { Lote } from '../../shared/models/lote';
+import { CrearProductoDto, EditarProductoDto } from '../../shared/models/productoDto';
 
 @Injectable({
   providedIn: 'root',
 })
-export class Productos {
+export class Servidor {
 
   //Creamos un constructor
   constructor(private http: HttpClient) {} // Inyectamos HttpClient
 
   //Creamos una variable
-  private BASE_ULR = 'http://localhost:8080/'; // Creamos la url del API Gateway
+  private BASE_ULR = 'http://localhost:8080'; // Creamos la url del API Gateway
   
   //Observable nos permite observar todas las respuestas del servidor
   //Podemos o no usas el Observable para tipar las respuestas
@@ -46,12 +47,12 @@ export class Productos {
     return this.http.get<Producto[]>(this.BASE_ULR + '/productos/'); // Esperamos una lista de productos
   }
 
-  guardarProducto(producto: Producto) {
-    return this.http.post<Producto>(this.BASE_ULR + '/productos/', producto); // Esperamos un Producto
+  guardarProducto(productoDto: CrearProductoDto) {
+    return this.http.post<Producto>(this.BASE_ULR + '/productos/', productoDto); // Esperamos un Producto
   }
 
-  editarProducto(id: number, producto: Producto) {
-    return this.http.patch<Producto>(this.BASE_ULR + '/productos/' + id + '/', producto); // Esperamos un producto editado
+  editarProducto(productoDto: EditarProductoDto) {
+    return this.http.patch<Producto>(this.BASE_ULR + '/productos/' + productoDto.id + '/', productoDto); // Esperamos un producto editado
   }
 
   eliminarProducto(id: number) {

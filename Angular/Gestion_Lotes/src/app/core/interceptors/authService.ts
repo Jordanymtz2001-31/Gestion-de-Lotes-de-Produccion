@@ -43,11 +43,11 @@ export class AuthService {
    * Uso: `authService.login('u','p').subscribe(...)`.
    */
   login(username: string, password: string) {
-    return this.http.post(`${this.apiUrl}usuario/login/`, { username, password })
+    return this.http.post(this.apiUrl + 'usuario/login/', { username, password })
       .pipe(
         tap((response: any) => {
           // Guardamos el token para el interceptor y el usuario para restaurar sesión
-          localStorage.setItem('access_token', response.access_token);
+          localStorage.setItem('access_token', response.access);
           localStorage.setItem('usuario', JSON.stringify(response.user));
           // Actualizamos la signal; cualquier componente lector se actualizará
           this.usuarioActual.set(response.user);
@@ -64,7 +64,7 @@ export class AuthService {
     localStorage.removeItem('access_token');
     localStorage.removeItem('usuario');
     this.usuarioActual.set(null);
-    //this.router.navigate(['/login']);
+    this.router.navigate(['/login']);
   }
 
   /**
