@@ -60,7 +60,7 @@ class LoginView(APIView):
             token = CustomAccessToken.for_user(user)
 
             return Response({
-                'access': str(token),
+                'access': str(token), #Este nombre es el que usaremos en el interceptor en ANGULAR
                 'user': {
                     'id': user.id,
                     'username': user.username,

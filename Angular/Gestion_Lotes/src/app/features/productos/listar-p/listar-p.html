@@ -74,7 +74,8 @@
                 {{ producto.stock_actual }}
               </span>
             </td>
-            <td *ngIf="esAdmin">
+            @if (esAdmin) {
+            <td>
               <div class="btn-group-action">
                 <a
                   [routerLink]="['/editar-producto', producto.id]"
@@ -92,6 +93,7 @@
                 </button>
               </div>
             </td>
+            }
           </tr>
           }
           @if (productosFiltrados.length === 0) {

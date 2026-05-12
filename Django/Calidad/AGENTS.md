@@ -45,11 +45,18 @@
 
 ## Permisos por rol
 
-| Rol | Permisos |
-|-----|----------|
-| admin | CRUD completo |
-| operador | Ver reportes |
-| supervisor | Registrar inspecciones, aprobar/rechazar lotes |
+| Rol | Listar/Ver | Crear Reporte | Eliminar |
+|-----|------------|---------------|----------|
+| ADMIN | ✅ | ✅ | ✅ |
+| OPERADOR | ✅ | ❌ | ❌ |
+| SUPERVISOR | ✅ | ✅ | ❌ |
+
+## Configuración
+
+- Puerto: 8004
+- Middleware: `GatewayAuthMiddleware` (valida headers trustados)
+- Permisos base: `IsAuthenticated`
+- Base de datos: SQLite (desarrollo)
 
 ## Patrones a seguir
 

@@ -32,6 +32,9 @@ COPY --from=builder /install /usr/local
 #Copiamos el codigo de la aplicacion al contenedor
 COPY . .
 
+#Evitamos que python genere archivos de configuracion que no necesitamos para esta ocacion
+ENV PYTHONUNBUFFERED=1
+
 #Exponemos el puerto 8002 en el que corre la aplicacion
 EXPOSE 8002
 

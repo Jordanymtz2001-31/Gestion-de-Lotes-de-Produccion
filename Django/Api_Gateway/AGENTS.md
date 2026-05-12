@@ -34,53 +34,77 @@
    Reciben headers trustados, NO validan tokens
 ```
 
-## Middleware JWT
+## Validación JWT (nginx auth_request)
 
-El API Gateway implementa el middleware de validación JWT:
+El Gateway usa el módulo `auth_request` de nginx para validar JWT:
 
-```python
-class JWTMiddleware:
-    def __init__(self, get_response):
-        self.get_response = get_response
+```nginx
+# nginx.conf - Validación JWT
+location / {
+    # auth_request redirige a /auth-verify con el token
+    auth_request /auth-verify;
+    # Si es válido, nginx inyecta headers antes de reenviar
+    proxy_set_header X-User-ID $http_authorization_user_id;
+    proxy_set_header X-User-Rol $http_authorization_user_rol;
+    
+    # Reenviar al servicio correspondiente
+    proxy_pass http://inventario_app:8003;
+}
 
-    def __call__(self, request):
-        # Rutas públicas
-        if request.path in ['/health/', '/auth/login/']:
-            return self.get_response(request)
-
-        token = request.headers.get('Authorization', '').replace('Bearer ', '')
-
-        if not token:
-            return JsonResponse({'error': 'Token requerido'}, status=401)
-
-        try:
-            payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
-            # Agregar headers para servicios downstream
-            request.META['HTTP_X_USER_ID'] = payload['user_id']
-            request.META['HTTP_X_USER_NOMBRE'] = payload['nombre']
-            request.META['HTTP_X_USER_ROL'] = payload['rol']
-        except jwt.ExpiredSignatureError:
-            return JsonResponse({'error': 'Token expirado'}, status=401)
-        except jwt.InvalidTokenError:
-            return JsonResponse({'error': 'Token inválido'}, status=401)
-
-        return self.get_response(request)
+# Subrequest que valida el token
+location = /auth-verify {
+    # Internal: solo nginx usa esto
+    internal;
+    proxy_pass http://usuarios_app:8000/usuario/verify/;
+    proxy_pass_request_headers off;
+}
 ```
 
-## Rutas de servicios
+### Flujo nginx
+```
+1. Petición entra a nginx
+2. auth_request /auth-verify → Auth Service (interno)
+3. Auth verifica token → retorna headers si válido
+4. nginx inyecta X-User-ID, X-User-Rol
+5. Reenvía al servicio destino
+```
 
-| Servicio | Prefijo |
-|----------|---------|
-| Auth | /auth/* |
-| Catálogo | /catalogo/* |
-| Inventario | /inventario/* |
-| Calidad | /calidad/* |
-| Alertas | /alertas/* |
+## Rutas de servicios (nginx.conf)
+
+| Servicio | Ruta Nginx | Puerto Contenedor |
+|----------|-----------|-------------------|
+| Auth | `/usuario/` | usuarios_app:8000 |
+| Producto | `/producto/` | producto_app:8001 |
+| Proveedor | `/proveedor/` | proveedor_app:8002 |
+| Inventario | `/inventario/` | inventario_app:8003 |
+| Calidad | `/calidad/` | calidad_app:8004 |
+| Alertas | `/alertas/` | alertas_app:8005 |
+
+### Rutas públicas (sin JWT)
+- `/usuario/login/`
+- `/health/`
 
 ## Configuración
 
+### Docker Compose
+```yaml
+services:
+  nginx:
+    image: jordany31/api-gateway:dev
+    ports:
+      - "8080:80"
+    networks:
+      - gestion_lote_net
+
+networks:
+  gestion_lote_net:
+    external: true
+```
+
+### Variables
 - JWT_SECRET: clave compartida con todos los servicios
-- ALLOWED_HOSTS: dominios permitidos
+- Puerto expuesto: 8080
+- Red Docker: gestion_lote_net
 - Rate limiting opcional (proteger contra ataques)
 
 ## Notas específicas

@@ -39,12 +39,14 @@ INSTALLED_APPS = [
     'api',
     'rest_framework',
     'rest_framework_simplejwt',
-    'corsheaders',
+    #'corsheaders',
 ]
 
+"""
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:4200", #Dominio de angular
 ]
+"""
 
 from datetime import timedelta # Importamos timedelta para definir el tiempo de expiracion
 
@@ -71,7 +73,7 @@ REST_FRAMEWORK = {
 AUTH_USER_MODEL = 'api.Usuario'
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
+    #'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',

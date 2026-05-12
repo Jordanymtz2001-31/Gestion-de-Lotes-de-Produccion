@@ -16,6 +16,13 @@
 
 ```
 /Django/           → Backend (Django + DRF)
+  ├── Api_Gateway/ → nginx + JWT validation
+  ├── Auth/        → Autenticación (puerto 8000)
+  ├── Producto/    → Productos (puerto 8001)
+  ├── Proveedor/   → Proveedores (puerto 8002)
+  ├── Inventario/ → Lotes y movimientos (puerto 8003)
+  ├── Calidad/    → Inspecciones (puerto 8004)
+  └── Alertas/    → Stock y reportes (puerto 8005)
 /Angular/          → Frontend (Angular 17 + NgRx)
 AGENTS.md          → Este archivo
 .gitignore        → Archivos ignorados por Git
@@ -27,14 +34,15 @@ AGENTS.md          → Este archivo
 
 ## 3. Servicios Django
 
-| Servicio | Ubicación | Propósito |
-|----------|-----------|-----------|
-| **Auth** | `./Django/Auth/` | Autenticación y gestión de usuarios |
-| **Catálogo** | `./Django/Catalogo/` | Productos y proveedores |
-| **Inventario** | `./Django/Inventario/` | Lotes y movimientos |
-| **Calidad** | `./Django/Calidad/` | Inspecciones de calidad |
-| **Alertas** | `./Django/Alertas/` | Stock y reportes |
-| **Gateway** | `./Django/Api_Gateway/` | Validación JWT y routing (nginx + Django) |
+| Servicio | Puerto | Ubicación | Propósito |
+|----------|--------|-----------|-----------|
+| **API Gateway** | 8080 | `./Django/Api_Gateway/` | Validación JWT (nginx) |
+| **Auth** | 8000 | `./Django/Auth/` | Autenticación y gestión de usuarios |
+| **Producto** | 8001 | `./Django/Producto/` | Catálogo de productos |
+| **Proveedor** | 8002 | `./Django/Proveedor/` | Catálogo de proveedores |
+| **Inventario** | 8003 | `./Django/Inventario/` | Lotes y movimientos |
+| **Calidad** | 8004 | `./Django/Calidad/` | Inspecciones de calidad |
+| **Alertas** | 8005 | `./Django/Alertas/` | Stock y reportes |
 
 ---
 
@@ -96,18 +104,19 @@ El API Gateway es el punto de entrada único. Toda petición pasa por él antes 
 4. nginx inyecta `X-User-ID` y `X-User-Rol` en la petición
 5. Petición reenviada al servicio destino
 
-### Rutas configuradas
+### Rutas configuradas (puerto 8080)
 
-| Ruta | Servicio | Contenedor | Puerto |
-|------|----------|------------|--------|
-| `/usuario/login/` | Auth | usuarios_app | 8000 |
-| `/usuario/` | Auth | usuarios_app | 8000 |
-| `/producto/` | Producto | producto_app | 8001 |
-| `/proveedor/` | Proveedor | proveedor_app | 8002 |
+| Ruta | Servicio | Puerto |
+|------|----------|--------|
+| `/usuario/` | Auth | 8000 |
+| `/producto/` | Producto | 8001 |
+| `/proveedor/` | Proveedor | 8002 |
+| `/inventario/` | Inventario | 8003 |
 
 ### Rutas públicas (sin JWT)
 
 - `/usuario/login/`
+- `/health/`
 
 ---
 

@@ -37,9 +37,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # 'corsheaders',  # Comentado - CORS se maneja en nginx
     'api',
     'rest_framework',
 ]
+
+# CORS se maneja en nginx, no en Django
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:4200",
+# ]
 
 REST_FRAMEWORK = {
     #Indicamos que usaremos nuestro propio manejador de exepciones personalizado de manera global
@@ -47,6 +53,7 @@ REST_FRAMEWORK = {
 }
 
 MIDDLEWARE = [
+    # 'corsheaders.middleware.CorsMiddleware',  # Comentado - CORS se maneja en nginx
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',

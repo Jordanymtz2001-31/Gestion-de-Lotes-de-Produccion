@@ -22,8 +22,17 @@
 | **Producto** | 8001 | producto_app | PRODUCTO | ✅ Implementado |
 | **Proveedor** | 8002 | proveedor_app | PROVEEDOR | ✅ Implementado |
 | **Inventario** | 8003 | inventario_app | LOTE, MOVIMIENTO | ✅ Implementado |
-| **Calidad** | 8004 | calidad_app | REPORTE_CALIDAD | 🔄 Pendiente |
-| **Alertas** | 8005 | alertas_app | ALERTA_STOCK | 🔄 Pendiente |
+| **Calidad** | 8004 | calidad_app | REPORTE_CALIDAD | 🔄 Pendiente implementación |
+| **Alertas** | 8005 | alertas_app | ALERTA_STOCK | 🔄 Pendiente implementación |
+
+### Servicios Implementados con IsAuthenticated + GatewayAuthMiddleware
+
+| Servicio | Puerto | Middleware | Permisos |
+|----------|--------|------------|----------|
+| Auth | 8000 | JWT propio | Login público, resto JWT |
+| Producto | 8001 | ✅ GatewayAuthMiddleware | ✅ IsAuthenticated |
+| Proveedor | 8002 | ✅ GatewayAuthMiddleware | ✅ IsAuthenticated |
+| Inventario | 8003 | ✅ GatewayAuthMiddleware | ✅ IsAuthenticated |
 
 > **Nota:** Para detalles específicos de cada servicio, consultar su AGENTS.md en la carpeta correspondiente.
 
@@ -249,9 +258,9 @@ Todos requieren: `Authorization: Bearer {access_token}`
 
 | Método | Endpoint | Permiso | Descripción |
 |--------|----------|---------|-------------|
-| GET | `/producto/productos/` | - | Listar |
+| GET | `/producto/productos/` | Login | Listar |
 | POST | `/producto/productos/` | ADMIN | Crear |
-| GET | `/producto/productos/{id}/` | - | Ver |
+| GET | `/producto/productos/{id}/` | Login | Ver |
 | PUT/PATCH | `/producto/productos/{id}/` | ADMIN | Actualizar |
 | DELETE | `/producto/productos/{id}/` | ADMIN | Eliminar |
 
@@ -259,9 +268,9 @@ Todos requieren: `Authorization: Bearer {access_token}`
 
 | Método | Endpoint | Permiso | Descripción |
 |--------|----------|---------|-------------|
-| GET | `/proveedor/proveedores/` | - | Listar |
+| GET | `/proveedor/proveedores/` | Login | Listar |
 | POST | `/proveedor/proveedores/` | ADMIN | Crear |
-| GET | `/proveedor/proveedores/{id}/` | - | Ver |
+| GET | `/proveedor/proveedores/{id}/` | Login | Ver |
 | PUT/PATCH | `/proveedor/proveedores/{id}/` | ADMIN | Actualizar |
 | DELETE | `/proveedor/proveedores/{id}/` | ADMIN | Eliminar |
 
@@ -269,11 +278,11 @@ Todos requieren: `Authorization: Bearer {access_token}`
 
 | Método | Endpoint | Permiso | Descripción |
 |--------|----------|---------|-------------|
-| GET | `/inventario/lotes/` | - | Listar lotes |
+| GET | `/inventario/lotes/` | Login | Listar lotes |
 | POST | `/inventario/lotes/` | OPERADOR, ADMIN | Crear lote |
-| GET | `/inventario/lotes/{id}/` | - | Ver lote |
+| GET | `/inventario/lotes/{id}/` | Login | Ver lote |
 | PATCH | `/inventario/lotes/{id}/` | ADMIN, SUPERVISOR | Actualizar estado |
-| GET | `/inventario/stock/?producto_id=X` | - | Consultar stock |
+| GET | `/inventario/stock/?producto_id=X` | Login | Consultar stock |
 
 ---
 
@@ -295,7 +304,7 @@ Todos requieren: `Authorization: Bearer {access_token}`
 
 ```
 Django/
-├── AGENTS.md                    # Este archivo
+├── Agents.md                    # Este archivo (raíz)
 ├── Api_Gateway/
 │   ├── AGENTS.md
 │   ├── nginx.conf
@@ -303,21 +312,24 @@ Django/
 ├── Auth/
 │   ├── AGENTS.md
 │   ├── api/
-│   │   ├── models.py
-│   │   ├── views.py
-│   │   ├── serializers.py
-│   │   ├── urls.py
-│   │   └── permissions.py
+│   │   ├── models.py, views.py, serializers.py, urls.py, permissions.py
+│   │   └── middleware.py, exceptions.py
 │   └── docker-compose.yml
 ├── Producto/
 │   ├── AGENTS.md
 │   └── api/
+│       ├── models.py, views.py, serializers.py, urls.py
+│       ├── middleware.py, permissions.py, exceptions.py
 ├── Proveedor/
 │   ├── AGENTS.md
 │   └── api/
+│       ├── models.py, views.py, serializers.py, urls.py
+│       └── middleware.py, exceptions.py
 ├── Inventario/
 │   ├── AGENTS.md
 │   └── api/
+│       ├── models.py, views.py, serializers.py, urls.py
+│       ├── middleware.py, services.py, exceptions.py
 ├── Calidad/
 │   └── AGENTS.md
 └── Alertas/

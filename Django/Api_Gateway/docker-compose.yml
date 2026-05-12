@@ -7,8 +7,10 @@ services:
     container_name: gateway #Nombre del contenedor
     ports:
       - "8080:80"
-    #volumes:
+    volumes:
     #  - ./nginx.conf:/etc/nginx/nginx.conf:ro #Volumen para almacenar el archivo de configuracion de nginx de forma local para mi
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro #Volumen para almacenar el archivo de configuracion de nginx
+      - ./cors_support.conf:/etc/nginx/cors_support.conf:ro #Volumen para almacenar el archivo de configuracion de cors y encuentro de rutas
     networks:
       - gestion_lote_net
 

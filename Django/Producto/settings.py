@@ -39,12 +39,13 @@ INSTALLED_APPS = [
     'api',
     'rest_framework',
     'rest_framework_simplejwt',
-    'corsheaders',
+    # 'corsheaders',  # Comentado - CORS se maneja en nginx
 ]
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:4200", #Dominio de angular
-]
+# CORS se maneja en nginx, no en Django
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:4200",
+# ]
 
 from datetime import timedelta # Importamos timedelta para definir el tiempo de expiracion
 

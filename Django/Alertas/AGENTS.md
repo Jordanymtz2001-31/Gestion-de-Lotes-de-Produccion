@@ -49,11 +49,18 @@ class AlertaStockManager(models.Manager):
 
 ## Permisos por rol
 
-| Rol | Permisos |
-|-----|----------|
-| admin | CRUD completo, ver todas las alertas |
-| operador | Ver alertas |
-| supervisor | Ver y gestionar alertas |
+| Rol | Listar/Ver | Crear/Editar | Eliminar |
+|-----|------------|--------------|----------|
+| ADMIN | ✅ | ✅ | ✅ |
+| OPERADOR | ✅ | ❌ | ❌ |
+| SUPERVISOR | ✅ | ✅ | ❌ |
+
+## Configuración
+
+- Puerto: 8005
+- Middleware: `GatewayAuthMiddleware` (valida headers trustados)
+- Permisos base: `IsAuthenticated`
+- Base de datos: SQLite (desarrollo)
 
 ## Reportes
 
