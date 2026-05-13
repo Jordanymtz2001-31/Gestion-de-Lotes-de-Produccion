@@ -2,9 +2,11 @@
   <!-- Page Header -->
   <div class="page-header">
     <h2>Proveedores</h2>
-    <a *ngIf="esAdmin" routerLink="/guardar-proveedor" class="btn btn-primary">
+    @if (esAdmin) {
+    <a routerLink="/guardar-proveedor" class="btn btn-primary">
       <i class="bi bi-plus-circle me-1"></i> Nuevo Proveedor
     </a>
+    }
   </div>
 
   <!-- Search -->
@@ -14,22 +16,27 @@
       class="form-control search-input"
       placeholder="Buscar por nombre o email..."
       [(ngModel)]="busqueda"
-      (input)="filtrarProveedores()"
-    />
+      (input)="filtrarProveedores()" 
+    /> <!-- (input)="filtrarProveedores()" es para que se ejecute la función filtrarProveedores() al escribir en el input-->
   </div>
 
   <!-- Loading -->
-  <div *ngIf="loading" class="loading-container">
+  @if (loading) {
+  <div class="loading-container">
     <div class="spinner-border spinner-primary" role="status">
       <span class="visually-hidden">Cargando...</span>
     </div>
   </div>
+  }
 
   <!-- Error -->
-  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+  @if (error) {
+  <div class="alert alert-danger">{{ error }}</div>
+  }
 
   <!-- Table -->
-  <div *ngIf="!loading && !error" class="table-container">
+  @if (!loading && !error) {
+  <div class="table-container">
     <div class="table-responsive">
       <table class="table table-hover mb-0">
         <thead>
@@ -38,11 +45,14 @@
             <th>Nombre</th>
             <th style="width: 140px">Teléfono</th>
             <th>Email</th>
-            <th *ngIf="esAdmin" style="width: 100px">Acciones</th>
+            @if (esAdmin) {
+            <th style="width: 100px">Acciones</th>
+            }
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let proveedor of proveedoresFiltrados">
+          @for (proveedor of proveedores; track proveedor.id) {
+          <tr>
             <td class="text-muted">{{ proveedor.id }}</td>
             <td class="fw-medium">{{ proveedor.nombre }}</td>
             <td>
@@ -53,7 +63,8 @@
               <i class="bi bi-envelope me-1 text-muted"></i>
               {{ proveedor.email }}
             </td>
-            <td *ngIf="esAdmin">
+            @if (esAdmin) {
+            <td>
               <div class="btn-group-action">
                 <a
                   [routerLink]="['/editar-proveedore', proveedor.id]"
@@ -71,15 +82,20 @@
                 </button>
               </div>
             </td>
+            }
           </tr>
-          <tr *ngIf="proveedoresFiltrados.length === 0">
+          }
+          @if (proveedoresFiltrados.length === 0) {
+          <tr>
             <td colspan="5" class="empty-state">
               <i class="bi bi-inbox d-block mb-2" style="font-size: 2rem;"></i>
               No hay proveedores registrados
             </td>
           </tr>
+          }
         </tbody>
       </table>
     </div>
   </div>
+  }
 </div>

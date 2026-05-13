@@ -9,6 +9,7 @@ export interface Producto {
 }
 
 // Creamos una array constante de las unidades de medida
+//Esto para mostrar las unidades de medida en el select de crear y editar
 export const UNIDADES_MEDIDA: { value: Producto['unidad_medida']; label: string }[] = [
     { value: 'METRO', label: 'Metro' },
     { value: 'KG',    label: 'Kilogramo' },

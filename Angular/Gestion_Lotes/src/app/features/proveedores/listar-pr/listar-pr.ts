@@ -9,21 +9,19 @@ import { Proveedor } from '../../../shared/models/proveedor';
 @Component({
   selector: 'app-listar-pr',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [RouterLink, FormsModule],
   templateUrl: './listar-pr.html',
   styleUrl: './listar-pr.css',
 })
 export class ListarPr implements OnInit {
-  proveedores: Proveedor[] = [];
-  proveedoresFiltrados: Proveedor[] = [];
-  busqueda: string = '';
+
+  proveedores: Proveedor[] = []; // Lista de proveedores que se cargan desde el servidor
+  proveedoresFiltrados: Proveedor[] = []; // Lista de proveedores filtrados
+  busqueda: string = ''; // Variable para almacenar la busqueda
   loading = false;
   error: string = '';
 
-  constructor(
-    private servidor: Servidor,
-    public authService: AuthService
-  ) {}
+  constructor(private servidor: Servidor, public authService: AuthService) {}
 
   get esAdmin(): boolean {
     return this.authService.rol === 'ADMIN';
@@ -38,9 +36,9 @@ export class ListarPr implements OnInit {
     this.error = '';
 
     this.servidor.listarProveedores().subscribe({
-      next: (data) => {
-        this.proveedores = Array.isArray(data) ? data : [];
-        this.proveedoresFiltrados = [...this.proveedores];
+      next: (proveedores) => {
+        this.proveedores = Array.isArray(proveedores) ? proveedores : []; // Convertir a un array si no lo es (cuando no llega un array/ no llega nada/ llega null) y en caso que no lo sea poner un array vacio
+        this.proveedoresFiltrados = [...this.proveedores]; // Hacer una copia de los proveedores para que se muestren los proveedores filtrados
         this.loading = false;
       },
       error: (err) => {
@@ -52,11 +50,11 @@ export class ListarPr implements OnInit {
   }
 
   filtrarProveedores() {
+    // Creamos una variable para almacenar la busqueda, y antes con el toLowerCase() es para que no se distinga entre mayusculas y minusculas
     const search = this.busqueda.toLowerCase();
     this.proveedoresFiltrados = this.proveedores.filter(
       (p) =>
-        p.nombre.toLowerCase().includes(search) ||
-        p.email.toLowerCase().includes(search)
+        p.nombre.toLowerCase().includes(search) // Filtrar los proveedores por nombre
     );
   }
 
@@ -67,8 +65,8 @@ export class ListarPr implements OnInit {
 
     this.servidor.eliminarProveedor(id).subscribe({
       next: () => {
-        this.proveedores = this.proveedores.filter((p) => p.id !== id);
-        this.filtrarProveedores();
+        this.proveedores = this.proveedores.filter((p) => p.id !== id); // Filtramos los proveedores para que no se muestre el proveedor eliminado
+        this.filtrarProveedores(); // Actualizamos la lista de proveedores
         alert('Proveedor eliminado correctamente');
       },
       error: (err) => {

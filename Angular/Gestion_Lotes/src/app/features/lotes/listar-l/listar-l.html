@@ -1,1 +1,120 @@
-<p>listar-l works!</p>
+<div class="container-fluid">
+  <!-- Page Header -->
+  <div class="page-header">
+    <h2>Lotes</h2>
+    @if (puedeCrear) {
+    <a routerLink="/guardar-lote" class="btn btn-primary">
+      <i class="bi bi-plus-circle me-1"></i> Nuevo Lote
+    </a>
+    }
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-row">
+    <div class="filter-group">
+      <select class="form-select" [(ngModel)]="filtroEstado" (change)="filtrarLotes()">
+        <option value="">Todos los estados</option>
+        <option value="REVISION">Revisión</option>
+        <option value="APROBADO">Aprobado</option>
+        <option value="RECHAZADO">Rechazado</option>
+        <option value="AGOTADO">Agotado</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <input
+        type="text"
+        class="form-control"
+        placeholder="Buscar por código..."
+        [(ngModel)]="busqueda"
+        (input)="filtrarLotes()"
+      />
+    </div>
+  </div>
+
+  <!-- Loading -->
+   @if (loading) {
+  <div class="loading-container">
+    <div class="spinner-border spinner-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+  }
+  <!-- Error -->
+   @if (error) {
+  <div class="alert alert-danger">{{ error }}</div>
+  }
+  <!-- Table -->
+   @if (!loading && !error) {
+  <div class="table-container">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th style="width: 80px">ID</th>
+            <th style="width: 140px">Código</th>
+            <th style="width: 100px">Producto ID</th>
+            <th style="width: 100px">Proveedor ID</th>
+            <th style="width: 100px">Cant. Inicial</th>
+            <th style="width: 100px">Cant. Actual</th>
+            <th style="width: 120px">Estado</th>
+            <th style="width: 140px">Fecha Entrada</th>
+            @if (esSupervisor || esAdmin) {
+            <th style="width: 100px">Acciones</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (lote of lotesFiltrados; track lote.id) {
+          <tr>
+            <td class="text-muted">{{ lote.id }}</td>
+            <td>
+              <code class="font-mono">{{ lote.codigo_lote }}</code>
+            </td>
+            <td>{{ lote.producto_id }}</td>
+            <td>{{ lote.proveedor_id }}</td>
+            <td>{{ lote.cantidad_inicial }}</td>
+            <td>
+              <span [ngClass]="{'text-danger': lote.cantidad_actual === 0}">
+                {{ lote.cantidad_actual }}
+              </span>
+            </td>
+            <td>
+              <span class="badge">
+                {{ lote.estado }}
+              </span>
+            </td>
+            <td class="text-muted">{{ lote.fecha_entrada | date:'short' }}</td>
+            @if (esSupervisor || esAdmin) {
+            <td>
+              @if (lote.estado === 'REVISION') { <!-- Si el lote está en revisión mostrar el dropdown -->
+              <div class="dropdown">
+                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                  Cambiar
+                </button>
+                <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" (click)="cambiarEstado(lote, 'APROBADO')">Aprobar</a></li>
+                  <li><a class="dropdown-item" (click)="cambiarEstado(lote, 'RECHAZADO')">Rechazar</a></li>
+                </ul>
+              </div>
+              }
+              @if (lote.estado !== 'REVISION') {
+              <span class="text-muted">—</span>
+              }
+            </td>
+            }
+          </tr>
+          }
+          @if (lotesFiltrados.length === 0) {
+          <tr>
+            <td colspan="9" class="empty-state">
+              <i class="bi bi-inbox d-block mb-2" style="font-size: 2rem;"></i>
+              No hay lotes registrados
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+  }
+</div>

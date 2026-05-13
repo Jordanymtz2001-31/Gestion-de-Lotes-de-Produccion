@@ -4,16 +4,18 @@ import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Servidor } from '../../../core/services/servidor';
 import { Proveedor } from '../../../shared/models/proveedor';
+import { CrearProveedorDto } from '../../../shared/models/proveedorDto';
 
 @Component({
   selector: 'app-guardar-pr',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [RouterLink, FormsModule],
   templateUrl: './guardar-pr.html',
   styleUrl: './guardar-pr.css',
 })
 export class GuardarPr {
-  proveedor: Partial<Proveedor> = {
+  // Crear proveedor
+  proveedor: CrearProveedorDto = {
     nombre: '',
     telefono: '',
     email: '',
@@ -23,10 +25,7 @@ export class GuardarPr {
   error = '';
   success = '';
 
-  constructor(
-    private servidor: Servidor,
-    private router: Router
-  ) {}
+  constructor(private servidor: Servidor, private router: Router) {}
 
   onSubmit() {
     if (!this.proveedor.nombre || !this.proveedor.telefono || !this.proveedor.email) {
@@ -38,7 +37,7 @@ export class GuardarPr {
     this.error = '';
     this.success = '';
 
-    this.servidor.guardarProveedor(this.proveedor as Proveedor).subscribe({
+    this.servidor.guardarProveedor(this.proveedor).subscribe({
       next: () => {
         this.success = 'Proveedor creado correctamente';
         this.loading = false;

@@ -6,7 +6,7 @@ from .models import Lote
 from .serializers import LoteSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import viewsets
-from api.services import verificar_producto, verificar_proveedor
+from api.services import verificar_producto, verificar_proveedor, actualizar_stock_producto
 
 #Clase para la vista de lotes
 class LoteViewSet(viewsets.ModelViewSet):
@@ -29,7 +29,7 @@ class LoteViewSet(viewsets.ModelViewSet):
         user_headers = {
             'X-User-ID': request.user_id,
             'X-User-Rol': request.user_rol,
-            'Host' : 'localhost' #Tenemos que pasarle el host que crea la libreria requests automaticamente de lo contrario da error
+            'Host' : 'localhost' #En desarollo usamos localhost, no pasamos por el api gateway, sino directamente al microservicio
         }
 
         # Verificamos que el producto existe
@@ -59,7 +59,7 @@ class LoteViewSet(viewsets.ModelViewSet):
 
         # Validar que el estado nuevo sea válido (EN POSTMAN mientras, ya en ANGULAR colocare los estados validos)
         estados_validos = ["REVISION", "APROBADO", "RECHAZADO", "AGOTADO"]
-        if nuevo_estado and nuevo_estado not in estados_validos:
+        if nuevo_estado not in estados_validos:
             return Response({'error': f'Estado inválido. Opciones: {estados_validos}'},
                 status=status.HTTP_400_BAD_REQUEST
             )
@@ -70,7 +70,8 @@ class LoteViewSet(viewsets.ModelViewSet):
 
             user_headers = {
                 'X-User-ID': request.user_id,
-                'X-User-Rol': request.user_rol
+                'X-User-Rol': request.user_rol,
+                'Host' : 'localhost'
             }
 
             # Obtenemos el stock actual del producto y le pasamos el id del producto
@@ -98,12 +99,13 @@ class LoteViewSet(viewsets.ModelViewSet):
 
             user_headers = {
                 'X-User-ID': request.user_id,
-                'X-User-Rol': request.user_rol
+                'X-User-Rol': request.user_rol,
+                'Host' : 'localhost'
             }
 
             # Obtenemos el producto
             producto = verificar_producto(lote.producto_id, user_headers)
-            if not producto['valido']:
+            if not producto['Valido']:
                 return Response({'error': producto['error']}, status=status.HTTP_400_BAD_REQUEST)
 
             # Restamos — pasamos cantidad negativa
@@ -114,7 +116,7 @@ class LoteViewSet(viewsets.ModelViewSet):
                 user_headers
             )
 
-            if not actualizacion['valido']:
+            if not actualizacion['Valido']:
                 return Response(
                     {'error': f"No se pudo actualizar el stock: {actualizacion['error']}"},
                     status=status.HTTP_400_BAD_REQUEST

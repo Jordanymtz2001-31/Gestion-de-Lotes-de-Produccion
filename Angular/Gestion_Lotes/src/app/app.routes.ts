@@ -56,7 +56,7 @@ export const routes: Routes = [
     {path: 'guardar-usuario', canActivate: [authGuard, adminGuard], loadComponent: () => import('./features/usuarios/guardar-u/guardar-u').then(m => m.GuardarU)},
     {path: 'guardar-producto', canActivate: [authGuard, adminGuard], loadComponent: () => import('./features/productos/guardar-p/guardar-p').then(m => m.GuardarP)},
     {path: 'guardar-proveedor', canActivate: [authGuard, adminGuard], loadComponent: () => import('./features/proveedores/guardar-pr/guardar-pr').then(m => m.GuardarPr)},
-    {path: 'editar-usuario', canActivate: [authGuard, adminGuard], loadComponent: () => import('./features/usuarios/editar-u/editar-u').then(m => m.EditarU)},
+    {path: 'editar-usuario/:id', canActivate: [authGuard, adminGuard], loadComponent: () => import('./features/usuarios/editar-u/editar-u').then(m => m.EditarU)},
     {path: 'editar-producto/:id', canActivate: [authGuard, adminGuard], loadComponent: () => import('./features/productos/editar-p/editar-p').then(m => m.EditarP)},
     {path: 'editar-proveedore/:id', canActivate: [authGuard, adminGuard], loadComponent: () => import('./features/proveedores/editar-pr/editar-pr').then(m => m.EditarPr)},
 

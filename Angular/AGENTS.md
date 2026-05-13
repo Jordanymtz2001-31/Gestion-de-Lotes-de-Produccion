@@ -4,291 +4,174 @@
 
 ---
 
+## CONDICIÓN DE MANTENIMIENTO ⚠️
+
+**Este archivo debe mantener menos de 500 líneas.**
+
+Al actualizar, seguir estas reglas:
+- Usar tablas para lists en lugar de descripciones extensas
+- Referenciar archivos en lugar de mostrar código completo
+- Sectiones largas → resumir o mover a archivos separados
+- Incluir siempre referencia a la skill de diseño
+
+---
+
 ## 1. Información del Proyecto
 
 - **Nombre:** Textiles la Poblana - Sistema de Gestión de Inventarios
-- **Stack Frontend:** Angular 21 + Bootstrap 5 + SweetAlert2
-- **Puerto desarrollo:** 4200
+- **Stack:** Angular 21 + Bootstrap 5 + Design Tokens CSS
+- **Puerto:** 4200 | **API Gateway:** `http://localhost:8080/`
 - **Ruta:** `./Gestion_Lotes/`
-- **API Gateway:** `http://localhost:8080/`
 
 ---
 
-## 2. Estado Actual del Proyecto
+## 2. Estado Actual
 
-### ✅ Implementado
+### ✅ Completado
+| Módulo | Componentes |
+|--------|-------------|
+| **Auth** | Login (JWT) |
+| **Dashboard** | KPIs, tabla lotes recientes, acciones rápidas |
+| **Productos** | Listar, Crear, Editar, Buscar |
+| **Proveedores** | Listar, Crear, Editar, Buscar |
+| **Lotes** | Listar, Crear |
+| **Usuarios** | Listar, Crear, Editar, Buscar |
 
-| Módulo | Funcionalidad | Estado |
-|--------|--------------|--------|
-| **Auth** | Login con JWT | ✅ Completado |
-| **Usuarios** | Listar, Crear, Editar, Buscar | ✅ Completado |
-| **Productos** | Listar, Crear, Editar, Buscar | ✅ Completado |
-| **Proveedores** | Listar, Crear, Editar, Buscar | ✅ Completado |
-| **Lotes** | Listar, Crear | ✅ Completado |
-| **Navbar** | Navegación según rol | ✅ Completado |
-
-### 🔄 Pendiente
-
-- Movimientos de inventario (salidas)
+### ⏳ Pendiente
+- Movimientos (salidas de inventario)
 - Aprobación/rechazo de lotes (SUPERVISOR)
 - Reportes de calidad
-- Dashboard de alertas de stock
+- Alertas de stock bajo
 
 ---
 
-## 3. Estructura del Proyecto
+## 3. Estructura
 
 ```
-Angular/Gestion_Lotes/src/app/
+src/app/
 ├── core/
-│   ├── guards/
-│   │   └── auth-guard.ts        # authGuard, adminGuard
-│   ├── interceptors/
-│   │   ├── authService.ts       # Servicio de auth (token)
-│   │   └── interceptor.ts      # HttpInterceptor para token
-│   └── services/
-│       └── servidor.ts          # Servicios HTTP (API Gateway)
-├── shared/
-│   ├── components/
-│   │   └── navbar/              # Navbar dinámico por rol
-│   └── models/
-│       ├── usuario.ts
-│       ├── producto.ts
-│       ├── proveedor.ts
-│       └── lote.ts
+│   ├── guards/auth-guard.ts      # authGuard, adminGuard
+│   ├── interceptors/             # authService, interceptor
+│   └── services/servidor.ts      # HTTP services
+├── shared/models/                # usuario, producto, proveedor, lote
 ├── features/
-│   ├── auth/login/              # Login público
-│   ├── usuarios/
-│   │   ├── listar-u/            # Solo ADMIN
-│   │   ├── guardar-u/           # Solo ADMIN
-│   │   ├── buscar-u/
-│   │   └── editar-u/            # Solo ADMIN
-│   ├── productos/
-│   │   ├── listar-p/            # Login requerido
-│   │   ├── guardar-p/           # Solo ADMIN
-│   │   ├── buscar-p/
-│   │   └── editar-p/            # Solo ADMIN
-│   ├── proveedores/
-│   │   ├── listar-pr/           # Login requerido
-│   │   ├── guardar-pr/          # Solo ADMIN
-│   │   ├── buscar-pr/
-│   │   └── editar-pr/           # Solo ADMIN
-│   └── lotes/
-│       ├── listar-l/            # Login requerido
-│       └── guardar-l/           # OPERADOR, ADMIN
-├── app.routes.ts                # Rutas con lazy loading
-├── app.config.ts                # Configuración global
-└── app.ts                       # Componente raíz
+│   ├── auth/login/               # Login público
+│   ├── dashboard/                # Dashboard con KPIs
+│   ├── productos/                # CRUD completo
+│   ├── proveedores/              # CRUD completo
+│   ├── lotes/                    # Listar, guardar
+│   └── usuarios/                # CRUD (solo ADMIN)
+├── app.routes.ts                # Lazy loading routes
+├── app.config.ts                # HTTP + interceptors
+└── styles.css                  # Design tokens
 ```
 
 ---
 
-## 4. Rutas Implementadas
+## 4. Rutas
 
-### Rutas Públicas
-| Path | Componente | Descripción |
-|------|------------|-------------|
-| `/login` | Login | Página de login |
-
-### Rutas Protegidas (authGuard)
-| Path | Rol | Descripción |
-|------|-----|-------------|
-| `/listar-lotes` | Todos | Listar lotes |
-| `/listar-productos` | Todos | Listar productos |
-| `/listar-proveedores` | Todos | Listar proveedores |
-| `/guardar-lote` | OPERADOR, ADMIN | Crear lote |
-
-### Rutas Admin (authGuard + adminGuard)
-| Path | Descripción |
-|------|-------------|
-| `/listar-usuario` | Listar usuarios |
-| `/guardar-usuario` | Crear usuario |
-| `/editar-usuario` | Editar usuario |
-| `/guardar-producto` | Crear producto |
-| `/editar-producto` | Editar producto |
-| `/guardar-proveedor` | Crear proveedor |
-| `/editar-proveedore` | Editar proveedor |
+| Path | Rol | Componente |
+|------|-----|------------|
+| `/login` | Público | Login |
+| `/dashboard` | Auth | Dashboard |
+| `/listar-productos` | Auth | ListarP |
+| `/guardar-producto` | ADMIN | GuardarP |
+| `/editar-producto/:id` | ADMIN | EditarP |
+| `/listar-proveedores` | Auth | ListarPr |
+| `/guardar-proveedor` | ADMIN | GuardarPr |
+| `/editar-proveedore/:id` | ADMIN | EditarPr |
+| `/listar-lotes` | Auth | ListarL |
+| `/guardar-lote` | OPERADOR, ADMIN | GuardarL |
+| `/listar-usuarios` | ADMIN | ListarU |
 
 ---
 
-## 5. Servicios HTTP (servidor.ts)
+## 5. Diseño (Interface Design Skill)
 
-```typescript
-// Base URL
-private BASE_URL = 'http://localhost:8080/';
-
-// USUARIOS
-listarUsuarios(): Observable<Usuario[]>
-guardarUsuario(usuario: Usuario)
-editarUsuario(id: number, usuario: Usuario)
-eliminarUsuario(id: number)
-buscarUsuario(id: number)
-
-// PRODUCTOS
-listarProductos(): Observable<Producto[]>
-guardarProducto(producto: Producto)
-editarProducto(id: number, producto: Producto)
-eliminarProducto(id: number)
-buscarProducto(id: number)
-
-// PROVEEDORES
-listarProveedores(): Observable<Proveedor[]>
-guardarProveedor(proveedor: Proveedor)
-editarProveedor(id: number, proveedor: Proveedor)
-eliminarProveedor(id: number)
-buscarProveedor(id: number)
-
-// LOTES
-listarLotes(): Observable<Lote[]>
-guardarLote(lote: Lote)
-editarLote(id: number, lote: Lote)
-// eliminarLote() - No implementado (no se eliminan lotes)
+### Design Tokens (`styles.css`)
+```css
+:root {
+  /* Colors */
+  --gray-50 to --gray-900
+  --primary-500, --primary-600, --primary-700
+  --success-500, --warning-500, --danger-500
+  
+  /* Depth: borders-only */
+  --border-subtle, --border-default
+  
+  /* Spacing: base 4px */
+  --space-1 to --space-8
+  
+  /* Radius */
+  --radius-sm, --radius-md, --radius-lg, --radius-xl
+}
 ```
+
+### Principios Aplicados
+- Subtle Layering (bordes suaves, sin sombras dramáticas)
+- Text hierarchy (4 niveles)
+- Spacing consistente
+- Color con propósito (semántico)
+
+### Recursos
+- **Skill:** `skill:interface-design` cargada
+- **Referencia:** `.claude/skills/interface-design/`
 
 ---
 
 ## 6. Autenticación
 
-### Flujo
-1. Login → POST `/usuario/login/` → Recibe `access` token
-2. Token se guarda en memoria (authService)
-3. Interceptor agrega `Authorization: Bearer {token}` a cada request
-4. Guards verifican token y rol para acceso a rutas
+1. Login → `POST /usuario/login/` → Recibe token `access`
+2. authService guarda en localStorage
+3. interceptor agrega `Authorization: Bearer {token}`
+4. authGuard / adminGuard protegen rutas
 
-### Guards
+---
+
+## 7. Servicios HTTP
+
+| Entidad | Métodos |
+|---------|---------|
+| **Usuario** | listar, guardar, editar, eliminar, buscar |
+| **Producto** | listar, guardar, editar, eliminar, buscar |
+| **Proveedor** | listar, guardar, editar, eliminar, buscar |
+| **Lote** | listar, guardar, editar |
+
+---
+
+## 8. Modelos TypeScript
+
 ```typescript
-authGuard     // Verifica que tenga token (cualquier rol)
-adminGuard    // Verifica que el rol sea ADMIN
+interface Usuario   { id, username, email, rol, is_active }
+interface Producto { id, nombre, codigo, descripcion, unidad_medida, stock_actual }
+interface Proveedor{ id, nombre, telefono, email }
+interface Lote     { id, codigo_lote, producto_id, proveedor_id, cantidad_actual, estado }
 ```
 
----
-
-## 7. Modelos TypeScript
-
-```typescript
-// usuario.ts
-interface Usuario {
-  id: number;
-  username: string;
-  email: string;
-  rol: 'ADMIN' | 'OPERADOR' | 'SUPERVISOR';
-  is_active: boolean;
-  date_joined: string;
-}
-
-// producto.ts
-interface Producto {
-  id: number;
-  nombre: string;
-  codigo: string;
-  unidad_medida: string;
-  stock_actual: number;
-}
-
-// proveedor.ts
-interface Proveedor {
-  id: number;
-  nombre: string;
-  telefono: string;
-  email: string;
-}
-
-// lote.ts
-interface Lote {
-  id: number;
-  codigo_lote: string;
-  producto_id: number;
-  proveedor_id: number;
-  cantidad_inicial: number;
-  cantidad_actual: number;
-  fecha_produccion: string;
-  fecha_entrada: string;
-  estado: 'REVISION' | 'APROBADO' | 'RECHAZADO' | 'AGOTADO';
-}
-```
+### Estados Lote: REVISION → APROBADO → RECHAZADO | AGOTADO
 
 ---
 
-## 8. Estados de Lote
-
-| Estado | Descripción | Disponible para Salida |
-|--------|-------------|----------------------|
-| REVISION | Recién registrado | ❌ No |
-| APROBADO | Aprobado por supervisor | ✅ Sí |
-| RECHAZADO | No cumple estándares | ❌ No |
-| AGOTADO | Sin stock | ❌ No |
-
----
-
-## 9. Permisos por Rol
-
-| Rol | Usuarios | Productos | Proveedores | Lotes |
-|-----|----------|-----------|-------------|-------|
-| **ADMIN** | CRUD | CRUD | CRUD | Crear |
-| **OPERADOR** | Ver | Ver | Ver | Crear |
-| **SUPERVISOR** | Ver | Ver | Ver | Ver + Cambiar estado |
-
----
-
-## 10. Dependencias
-
-```json
-{
-  "@angular/core": "^21.1.0",
-  "bootstrap": "^5.3.8",
-  "sweetalert2": "^11.26.24",
-  "rxjs": "~7.8.0"
-}
-```
-
----
-
-## 11. Comandos Útiles
+## 9. Comandos
 
 ```bash
-# Servidor desarrollo
-npm start          # ng serve (puerto 4200)
-
-# Compilar producción
-npm run build      # ng build
-
-# Tests
-npm test           # ng test
+npm start        # ng serve (4200)
+npm run build   # producción
 ```
 
 ---
 
-## 12. Integración con Backend
+## 10. Referencias
 
-### Headers en peticiones
-```typescript
-// Interceptor agrega token automáticamente
-Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGc...
-```
-
-### Manejo de errores con SweetAlert2
-```typescript
-Swal.fire({
-  title: 'Error',
-  text: 'Credenciales inválidas',
-  icon: 'error'
-});
-```
+- Backend: `../../Django/AGENTS.md`
+- API Gateway: `../../Django/Api_Gateway/AGENTS.md`
+- Interface Design: skill cargada
 
 ---
 
-## 13. Pendientes Técnicos
+## 11. Pendientes
 
-- [ ] Implementar movimientos (salidas de inventario)
-- [ ] Aprobación/rechazo de lotes (SUPERVISOR)
-- [ ] Reportes de calidad
-- [ ] Dashboard de alertas de stock
-- [ ] Tests unitarios con Vitest
-
----
-
-## 14. Referencias
-
-- **Backend Django:** `../../Django/Agents.md`
-- **API Gateway:** `../../Django/Api_Gateway/AGENTS.md`
-- **Skill Interface Design:** ✅ Instalada
+- [ ] Movimientos (salidas)
+- [ ] Aprobación lotes (SUPERVISOR)
+- [ ] Calidad
+- [ ] Alertas stock

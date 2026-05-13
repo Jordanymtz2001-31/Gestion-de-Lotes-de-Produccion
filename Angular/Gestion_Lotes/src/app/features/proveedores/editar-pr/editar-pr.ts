@@ -4,16 +4,19 @@ import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Servidor } from '../../../core/services/servidor';
 import { Proveedor } from '../../../shared/models/proveedor';
+import { EditarProveedorDto } from '../../../shared/models/proveedorDto';
 
 @Component({
   selector: 'app-editar-pr',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [RouterLink, FormsModule],
   templateUrl: './editar-pr.html',
   styleUrl: './editar-pr.css',
 })
 export class EditarPr implements OnInit {
-  proveedor: Partial<Proveedor> = {
+  // Creamos un proveedor vacío
+  proveedor: EditarProveedorDto = {
+    id: 0,
     nombre: '',
     telefono: '',
     email: '',
@@ -22,7 +25,6 @@ export class EditarPr implements OnInit {
   loading = false;
   error = '';
   success = '';
-  proveedorId!: number;
 
   constructor(
     private servidor: Servidor,
@@ -31,17 +33,19 @@ export class EditarPr implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.proveedorId = Number(this.route.snapshot.paramMap.get('id'));
-    if (this.proveedorId) {
+    // Obtenemos el id de la url
+    this.proveedor.id = Number(this.route.snapshot.paramMap.get('id'));
+    if (this.proveedor.id) { // Si el id existe cargamos el proveedor
       this.cargarProveedor();
     }
   }
 
   cargarProveedor() {
     this.loading = true;
-    this.servidor.buscarProveedor(this.proveedorId).subscribe({
-      next: (data) => {
-        this.proveedor = data;
+    // Buscamos el proveedor
+    this.servidor.buscarProveedor(this.proveedor.id).subscribe({
+      next: (proveedor) => {
+        this.proveedor = proveedor;
         this.loading = false;
       },
       error: (err) => {
@@ -62,7 +66,7 @@ export class EditarPr implements OnInit {
     this.error = '';
     this.success = '';
 
-    this.servidor.editarProveedor(this.proveedorId, this.proveedor as Proveedor).subscribe({
+    this.servidor.editarProveedor(this.proveedor).subscribe({
       next: () => {
         this.success = 'Proveedor actualizado correctamente';
         this.loading = false;

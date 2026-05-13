@@ -1,5 +1,6 @@
+//Interfaz para Proveedor, es decir lo que vamos a recibir del servidor
 export interface Proveedor {
-    id?: number; // El ID suele ser opcional porque el servidor lo genera
+    id: number;
     nombre: string;
     telefono: string;
     email: string;

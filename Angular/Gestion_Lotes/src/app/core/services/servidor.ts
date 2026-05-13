@@ -6,6 +6,9 @@ import { Observable } from 'rxjs';
 import { Proveedor } from '../../shared/models/proveedor';
 import { Lote } from '../../shared/models/lote';
 import { CrearProductoDto, EditarProductoDto } from '../../shared/models/productoDto';
+import { CrearUsuarioDto, EditarUsuarioDto } from '../../shared/models/usuarioDto';
+import { CrearProveedorDto, EditarProveedorDto } from '../../shared/models/proveedorDto';
+import { CambiarEstadoLoteDto, CrearLoteDto, EditarLoteDto } from '../../shared/models/loteDto';
 
 @Injectable({
   providedIn: 'root',
@@ -27,12 +30,12 @@ export class Servidor {
     return this.http.get<Usuario[]>(this.BASE_ULR + '/usuario/'); // Esperamos una lista de usuarios
   }
 
-  guardarUsuario(usuario: Usuario) {
+  guardarUsuario(usuario: CrearUsuarioDto) {
     return this.http.post<Usuario>(this.BASE_ULR + '/usuario/', usuario); // Esperamos un Usuario
   }
 
-  editarUsuario(id: number, usuario: Usuario) {
-    return this.http.patch<Usuario>(this.BASE_ULR + '/usuario/' + id + '/', usuario); // Esperamos un usuario editado
+  editarUsuario(usuario: EditarUsuarioDto) {
+    return this.http.patch<Usuario>(this.BASE_ULR + '/usuario/' + usuario.id + '/', usuario); // Esperamos un usuario editado
   }
 
   eliminarUsuario(id: number) {
@@ -68,12 +71,12 @@ export class Servidor {
     return this.http.get<Proveedor[]>(this.BASE_ULR + '/proveedores/'); // Esperamos una lista de proveedores
   }
   
-  guardarProveedor(proveedor: Proveedor) {
+  guardarProveedor(proveedor: CrearProveedorDto) {
     return this.http.post<Proveedor>(this.BASE_ULR + '/proveedores/', proveedor); // Esperamos un Proveedor
   }
 
-  editarProveedor(id: number, proveedor: Proveedor) {
-    return this.http.patch<Proveedor>(this.BASE_ULR + '/proveedores/' + id + '/', proveedor); // Esperamos un proveedor editado
+  editarProveedor(proveedor: EditarProveedorDto) {
+    return this.http.patch<Proveedor>(this.BASE_ULR + '/proveedores/' + proveedor.id + '/', proveedor); // Esperamos un proveedor editado
   }
 
   eliminarProveedor(id: number) {
@@ -89,11 +92,12 @@ export class Servidor {
     return this.http.get<Lote[]>(this.BASE_ULR + '/lotes/'); // Esperamos una lista de lotes
   }
 
-  guardarLote(lote: Lote) {
+  guardarLote(lote: CrearLoteDto) {
     return this.http.post<Lote>(this.BASE_ULR + '/lotes/', lote); // Esperamos un Lote
   }
 
-  editarLote(id: number, lote: Lote) {
+  // Metodo para solo cambiar el estado del lote
+  editarEstadoLote(id: number, lote: CambiarEstadoLoteDto) {
     return this.http.patch<Lote>(this.BASE_ULR + '/lotes/' + id + '/', lote); // Esperamos un lote editado
   }
 

@@ -1,0 +1,39 @@
+/* Container */
+.container {
+  padding: var(--space-6);
+}
+
+/* Card */
+.card {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: var(--border-subtle);
+}
+
+.card-header {
+  padding: var(--space-4) var(--space-6);
+}
+
+.card-body {
+  padding: var(--space-6);
+}
+
+/* Form spacing */
+.mb-3 {
+  margin-bottom: var(--space-4);
+}
+
+/* Form actions */
+.d-flex.justify-content-between {
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+  border-top: var(--border-subtle);
+}
+
+/* Alert info */
+.alert-info {
+  background-color: var(--primary-50);
+  color: var(--primary-700);
+  border-left: 3px solid var(--primary-500);
+  border: none;
+}

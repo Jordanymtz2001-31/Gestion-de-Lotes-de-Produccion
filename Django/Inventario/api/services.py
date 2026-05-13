@@ -2,6 +2,7 @@ import requests
 from rest_framework import status
 from rest_framework.response import Response
 
+#Apuntamos directamente a los microservicios sin pasar por el api gateway
 PRODUCTO_URL = "http://producto_app:8001"
 PROVEEDOR_URL = "http://proveedor_app:8002"
 
@@ -39,8 +40,8 @@ def verificar_producto(producto_id, user_headers):
     # {"Valido": True..} Es un indicador interno para que la vista sepa si la operacion fue exitosa o no
     # para que en mi vista no necesita saber nada de requets(peticiones), exceptiones HTTP y solo pregunta si es Valido
     except requests.exceptions.HTTPError as err:
-        
         status_code = err.response.status_code
+        print(f"ERROR {status_code} de productos: {err.response.text}")
         if status_code == 401:
             return {"Valido": False, "error": "El microservicio de Productos rechazo la peticion"}
         if status_code == 403:
@@ -127,7 +128,7 @@ def actualizar_stock_producto(producto_id, cantidad_inicial_a_sumar, stock_actua
     Returns:
         dict: {"valido": True, "data": {...}} o {"valido": False, "error": "..."}
     """
-    url = f"{PRODUCTO_URL}/productos/{producto_id}/"
+    url = f"{PRODUCTO_URL}/productos/{producto_id}/actualizar-stock/"
     # Sumamos la cantidad que tragimos del servicio de productos
     # Junto con la cantidad inicial del lote
     nuevo_stock = stock_actual + cantidad_inicial_a_sumar
@@ -139,18 +140,18 @@ def actualizar_stock_producto(producto_id, cantidad_inicial_a_sumar, stock_actua
             timeout=5
         )
         response.raise_for_status()
-        return {"valido": True, "data": response.json()}
+        return {"Valido": True, "data": response.json()}
 
     except requests.exceptions.HTTPError as err:
         status_code = err.response.status_code
-        return {"valido": False, "error": f"Error al actualizar stock: {status_code}"}
+        return {"Valido": False, "error": f"Error al actualizar stock: {status_code}"}
 
     except requests.exceptions.ConnectionError:
-        return {"valido": False, "error": "El microservicio de Productos no está corriendo"}
+        return {"Valido": False, "error": "El microservicio de Productos no está corriendo"}
     except requests.exceptions.Timeout:
-        return {"valido": False, "error": "El microservicio de Productos no responde"}
+        return {"Valido": False, "error": "El microservicio de Productos no responde"}
     except Exception as e:
-        return {"valido": False, "error": f"Error desconocido: {str(e)}"}
+        return {"Valido": False, "error": f"Error desconocido: {str(e)}"}
     """
     try:
         existe_producto = requests.get(
