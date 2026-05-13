@@ -33,3 +33,33 @@ class Lote(models.Model):
     class Meta:
         db_table = "Lote"
         ordering = ["-fecha_entrada"]
+
+
+# Modelo para movimientos de inventario (salidas)
+class Movimiento(models.Model):
+    lote = models.ForeignKey(Lote, on_delete=models.CASCADE, related_name='movimientos')
+    usuario_id = models.PositiveIntegerField(null=False, blank=False)
+    TIPOS = [
+        ('ENTRADA', 'Entrada'),
+        ('SALIDA',  'Salida'),
+    ]
+
+    tipo = models.CharField(max_length=20, null=False, blank=False)
+    cantidad = models.DecimalField(max_digits=10, decimal_places=2, null=False, blank=False)
+    DESTINOS = [
+        # Salidas
+        ('PRODUCCION',      'Producción'),
+        ('VENTA',           'Venta'),
+        ('DEVOLUCION_PROV', 'Devolución a proveedor'),
+        ('MUESTRA',         'Muestra'),
+        # Entradas
+        ('COMPRA',          'Compra'),
+        ('INGRESO_ALMACEN', 'Ingreso al almacen'),
+    ]
+    destino = models.CharField(max_length=100, null=True, blank=True)
+    observaciones = models.TextField(null=True, blank=True)
+    fecha = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "Movimiento"
+        ordering = ["-fecha"]

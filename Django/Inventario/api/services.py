@@ -152,33 +152,47 @@ def actualizar_stock_producto(producto_id, cantidad_inicial_a_sumar, stock_actua
         return {"Valido": False, "error": "El microservicio de Productos no responde"}
     except Exception as e:
         return {"Valido": False, "error": f"Error desconocido: {str(e)}"}
+
+
+def decrementar_stock_producto(producto_id, cantidad_a_restar, stock_actual, user_headers):
     """
-    try:
-        existe_producto = requests.get(
-            f"http://localhost:8001/api/productos/{producto_id}/", 
-            headers=user_headers, # Pasamos los headers para que el middleware no rechace la peticion
-            timeout=5 # Tiempo de espera de la peticion
-        )
-        #Recuperamos y almacenamos los cuerpos de las peticiones en formato JSON
-        productos = existe_producto.json()
+    Decrementa el stock_actual de un producto en el microservicio de Productos.
 
+    Se usa cuando se registra una salida de inventario para restar
+    la cantidad del stock del producto.
 
+    Args:
+        producto_id (int): ID del producto a actualizar.
+        cantidad_a_restar (float): Cantidad a restar del stock.
+        stock_actual (float): Stock actual del producto.
+        user_headers (dict): Headers con X-User-ID y X-User-Rol.
+
+    Returns:
+        dict: {"valido": True, "data": {...}} o {"valido": False, "error": "..."}
+    """
+    url = f"{PRODUCTO_URL}/productos/{producto_id}/actualizar-stock/"
     
-        if existe_producto.status_code == 200:
-            return existe_producto.json()  # devuelve los datos del producto
-        return None
-    except requests.exceptions.RequestException:
-        return None  # si el servicio no responde, devuelve None
-    """
-    """
-        if existe_producto.status_code == 200: # Si la peticion fue exitosa
-            return existe_producto.json() # Retornamos el json de la peticion
-        else:
-            error_detail = {
-                "Error" : "Error al obtener el producto",
-                "Detalle" : {existe_producto.status_code}
-            }
-            return Response(error_detail, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    except requests.exceptions.RequestException as e:
-        return Response({'error': f'Error de conexión con el servicio', 'detalle': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    """
+    nuevo_stock = stock_actual - cantidad_a_restar
+    if nuevo_stock < 0:
+        nuevo_stock = 0
+    
+    try:
+        response = requests.patch(
+            url,
+            json={"stock_actual": nuevo_stock},
+            headers=user_headers,
+            timeout=5
+        )
+        response.raise_for_status()
+        return {"Valido": True, "data": response.json()}
+
+    except requests.exceptions.HTTPError as err:
+        status_code = err.response.status_code
+        return {"Valido": False, "error": f"Error al decrementar stock: {status_code}"}
+
+    except requests.exceptions.ConnectionError:
+        return {"Valido": False, "error": "El microservicio de Productos no está corriendo"}
+    except requests.exceptions.Timeout:
+        return {"Valido": False, "error": "El microservicio de Productos no responde"}
+    except Exception as e:
+        return {"Valido": False, "error": f"Error desconocido: {str(e)}"}
