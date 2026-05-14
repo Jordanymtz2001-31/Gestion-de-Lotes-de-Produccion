@@ -76,6 +76,9 @@
           <a routerLink="/listar-lotes" class="btn btn-outline-secondary">
             <i class="bi bi-collection me-1"></i> Ver Lotes
           </a>
+          <a routerLink="/listar-movimientos" class="btn btn-outline-secondary">
+            <i class="bi bi-journal-text me-1"></i> Ver Movimientos
+          </a>
           @if (esAdmin) {
           <a routerLink="/listar-usuarios" class="btn btn-outline-secondary">
             <i class="bi bi-people me-1"></i> Gestión Usuarios
@@ -109,7 +112,7 @@
               @for (lote of lotesRecientes; track lote.id) {
               <tr>
                 <td>{{ lote.codigo_lote }}</td>
-                <td>{{ lote.producto_id }}</td>
+                <td>{{ getProductoNombre(lote.producto_id) }}</td>
                 <td>{{ lote.cantidad_actual }}</td>
                 <td>{{ lote.estado}}</td>
                 <td>{{ lote.fecha_entrada | date:'short' }}</td>

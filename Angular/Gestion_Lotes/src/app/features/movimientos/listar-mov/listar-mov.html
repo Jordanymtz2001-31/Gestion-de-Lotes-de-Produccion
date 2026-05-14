@@ -1,0 +1,104 @@
+<div class="container-fluid">
+  <!-- Page Header -->
+  <div class="page-header">
+    <h2>Movimientos</h2>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-row">
+    <div class="filter-group">
+      <select class="form-select" [(ngModel)]="filtroTipo" (change)="filtrarMovimientos()"> <!--El ((change)="filtrarMovimientos()") es para que se ejecute la función filtrarMovimientos() cuando cambie el valor de filtroTipo-->
+        <option value="">Todos los tipos</option>
+        @for (tipo of tipos; track tipo.value) {
+        <option [value]="tipo.value">{{ tipo.label }}</option>
+        }
+      </select>
+    </div>
+    <div class="filter-group">
+      <select class="form-select" [(ngModel)]="filtroDestino" (change)="filtrarMovimientos()">
+        <option value="">Todos los destinos</option>
+        @for (destino of destinosFiltrados; track destino.value) {
+        <option [value]="destino.value">{{ destino.label }}</option>
+        }
+      </select>
+    </div>
+    <div class="filter-group">
+      <input type="date" class="form-control" [(ngModel)]="filtroFecha" (change)="filtrarMovimientos()" />
+    </div>
+    <div class="filter-group">
+      <button class="btn btn-outline-secondary" (click)="limpiarFiltros()">
+        <i class="bi bi-x-circle me-1"></i> Limpiar
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  @if (loading) {
+  <div class="loading-container">
+    <div class="spinner-border spinner-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+  }
+
+  <!-- Error -->
+  @if (error) {
+  <div class="alert alert-danger">{{ error }}</div>
+  }
+
+  <!-- Table -->
+  @if (!loading && !error) {
+  <div class="table-container">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th style="width: 60px">ID</th>
+            <th style="width: 100px">Lote</th>
+            @if (esAdmin) {
+            <th style="width: 100px">Usuario</th>
+            }
+            <th style="width: 100px">Tipo</th>
+            <th style="width: 160px">Destino</th>
+            <th style="width: 100px">Cantidad</th>
+            <th style="width: 200px">Observaciones</th>
+            <th style="width: 150px">Fecha</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (mov of movimientosFiltrados; track mov.id) {
+          <tr>
+            <td class="text-muted">{{ mov.id }}</td>
+            <td>
+              <code class="font-mono">{{ getLoteCodigo(mov.lote) }}</code>
+            </td>
+            @if (esAdmin) {
+            <td>
+              <code class="font-mono">{{ getUsuarioNombre(mov.usuario_id) }}</code>
+            </td>
+            }
+            <td>
+              <span class="badge" [ngClass]="getBadgeClass(mov.tipo)">
+                {{ mov.tipo }}
+              </span>
+            </td>
+            <td>{{ mov.destino || '—' }}</td>
+            <td>{{ mov.cantidad }}</td>
+            <td class="text-muted">{{ mov.observaciones || '—' }}</td>
+            <td class="text-muted">{{ mov.fecha | date:'dd/MM/yyyy HH:mm' }}</td>
+          </tr>
+          }
+          @if (movimientosFiltrados.length === 0) {
+          <tr>
+            <td colspan="8" class="empty-state">
+              <i class="bi bi-inbox d-block mb-2" style="font-size: 2rem;"></i>
+              No hay movimientos registrados
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+  }
+</div>

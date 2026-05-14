@@ -1,5 +1,6 @@
 from django.db import transaction
 from django.db.models import Sum
+from decimal import Decimal
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -7,6 +8,7 @@ from .models import Lote, Movimiento
 from .serializers import LoteSerializer, MovimientoSerializer
 from rest_framework import viewsets
 from api.services import verificar_producto, verificar_proveedor, actualizar_stock_producto, decrementar_stock_producto
+
 
 #Para evitar repetir codigo creamos una funcion para crear movimientos
 def crear_movimiento(lote, usuario_id, tipo, cantidad, destino, observaciones=None):
@@ -67,7 +69,7 @@ class LoteViewSet(viewsets.ModelViewSet):
                 usuario_id=int(request.user_id),
                 tipo='ENTRADA',
                 cantidad=lote.cantidad_inicial,
-                destino='COMPRA',
+                destino=None, # No aplica
                 observaciones='Lote registrado en revisión'
             )
             
@@ -159,6 +161,19 @@ class LoteViewSet(viewsets.ModelViewSet):
                     observaciones=obs
                 )
 
+            # En el caso de que el SUPERVISOR cambie el estado de REVISION a RECHAZADO
+            if nuevo_estado == "RECHAZADO" and lote.estado == "REVISION":
+                # Si en observaciones viene algo, usamos eso, sino usamos el default
+                obs = observaciones if observaciones else 'Lote rechazado por supervisor'
+                crear_movimiento(
+                    lote=lote,
+                    usuario_id=int(request.user_id),
+                    tipo='SALIDA',
+                    cantidad=lote.cantidad_inicial,
+                    destino='DEVOLUCION_PROV',
+                    observaciones=obs
+                )
+
         return super().partial_update(request, *args, **kwargs)
 
 
@@ -182,7 +197,7 @@ class MovimientoViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         # Cualquier usuario autenticado puede crear una salida
         lote_id = request.data.get('lote')
-        cantidad = float(request.data.get('cantidad', 0))
+        cantidad = Decimal(str(request.data.get('cantidad', 0)))
 
         # Headers para comunicación con otros servicios
         user_headers = {
@@ -222,7 +237,7 @@ class MovimientoViewSet(viewsets.ModelViewSet):
         # Decrementar stock del producto (pasar cantidad negativa)
         actualizacion = decrementar_stock_producto(
             lote.producto_id,
-            cantidad,
+            float(cantidad),
             float(producto['data']['stock_actual']),
             user_headers
         )
@@ -236,7 +251,7 @@ class MovimientoViewSet(viewsets.ModelViewSet):
         #En caso de que el lote guarde pero movimiento falle, se debe hacer un rollback
         with transaction.atomic():
             # Decrementar cantidad_actual del lote
-            lote.cantidad_actual -= cantidad
+            lote.cantidad_actual -= Decimal(str(cantidad))
             if lote.cantidad_actual <= 0:
                 lote.cantidad_actual = 0
                 lote.estado = 'AGOTADO'

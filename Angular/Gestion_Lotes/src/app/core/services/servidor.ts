@@ -108,6 +108,10 @@ export class Servidor {
   }
 
   //----------------------------------------------------------MOVIMIENTOS--------------------------------------------------------------
+  listarMovimientos() {
+    return this.http.get<Movimiento[]>(this.BASE_ULR + '/movimientos/');
+  }
+
   registrarMovimiento(movimiento: CrearMovimientoDto) {
     return this.http.post<Movimiento>(this.BASE_ULR + '/movimientos/', movimiento);
   }

@@ -46,6 +46,7 @@ export const routes: Routes = [
 
     //Cualquier usuario con token puede pasar: ADMIN, OPERADOR, SUPERVISOR
     {path: 'listar-lotes', canActivate: [authGuard], loadComponent: () => import('./features/lotes/listar-l/listar-l').then(m => m.ListarL)},
+    {path: 'listar-movimientos', canActivate: [authGuard], loadComponent: () => import('./features/movimientos/listar-mov/listar-mov').then(m => m.ListarMov)},
     {path: 'listar-proveedores', canActivate: [authGuard], loadComponent: () => import('./features/proveedores/listar-pr/listar-pr').then(m => m.ListarPr)},
     {path: 'listar-productos', canActivate: [authGuard], loadComponent: () => import('./features/productos/listar-p/listar-p').then(m => m.ListarP)},
     {path: 'guardar-lote', canActivate: [authGuard], loadComponent: () => import('./features/lotes/guardar-l/guardar-l').then(m => m.GuardarL)},

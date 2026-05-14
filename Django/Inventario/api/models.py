@@ -44,7 +44,7 @@ class Movimiento(models.Model):
         ('SALIDA',  'Salida'),
     ]
 
-    tipo = models.CharField(max_length=20, null=False, blank=False)
+    tipo = models.CharField(max_length=20, null=False, blank=False, choices=TIPOS)
     cantidad = models.DecimalField(max_digits=10, decimal_places=2, null=False, blank=False)
     DESTINOS = [
         # Salidas
@@ -56,7 +56,7 @@ class Movimiento(models.Model):
         ('COMPRA',          'Compra'),
         ('INGRESO_ALMACEN', 'Ingreso al almacen'),
     ]
-    destino = models.CharField(max_length=100, null=True, blank=True) # Lo dejamos nulo por que al crear un lote no se le asigna ningun destino
+    destino = models.CharField(max_length=100, null=True, blank=True, choices=DESTINOS) # Lo dejamos nulo por que al crear un lote no se le asigna ningun destino
     observaciones = models.TextField(null=True, blank=True)
     fecha = models.DateTimeField(auto_now_add=True)
 

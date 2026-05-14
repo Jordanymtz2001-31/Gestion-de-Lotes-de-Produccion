@@ -1,4 +1,5 @@
 import requests
+from decimal import Decimal
 from rest_framework import status
 from rest_framework.response import Response
 
@@ -131,7 +132,7 @@ def actualizar_stock_producto(producto_id, cantidad_inicial_a_sumar, stock_actua
     url = f"{PRODUCTO_URL}/productos/{producto_id}/actualizar-stock/"
     # Sumamos la cantidad que tragimos del servicio de productos
     # Junto con la cantidad inicial del lote
-    nuevo_stock = stock_actual + cantidad_inicial_a_sumar
+    nuevo_stock = float(stock_actual) + float(cantidad_inicial_a_sumar)
     try:
         response = requests.patch( # Peticion para actualizar de forma parcial
             url,
@@ -172,7 +173,7 @@ def decrementar_stock_producto(producto_id, cantidad_a_restar, stock_actual, use
     """
     url = f"{PRODUCTO_URL}/productos/{producto_id}/actualizar-stock/"
     
-    nuevo_stock = stock_actual - cantidad_a_restar
+    nuevo_stock = float(stock_actual) - float(cantidad_a_restar)
     if nuevo_stock < 0:
         nuevo_stock = 0
     
