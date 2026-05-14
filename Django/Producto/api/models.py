@@ -25,7 +25,7 @@ class Producto(models.Model):
                                                 decimal_places=2,
                                                 default=0,
                                                 null=False,
-                                                blank=False) # PositiveIntegerField para garantizar que el stock sea un número positivo
+                                                blank=False)
 
     class Meta:
         db_table = 'producto'

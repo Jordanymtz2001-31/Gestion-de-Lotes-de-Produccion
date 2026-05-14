@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { forkJoin } from 'rxjs';
+import { catchError, forkJoin, of } from 'rxjs';
 import { Servidor } from '../../../core/services/servidor';
 import { AuthService } from '../../../core/interceptors/authService';
 import { Lote } from '../../../shared/models/lote';
@@ -28,13 +28,13 @@ export class ListarL implements OnInit {
   filtroEstado: string = '';
   busqueda: string = '';
   loading = false;
-  error = '';
+  errores: string[] = []; // Creamos un array para almacenar los errores
   destinos = TODOS_DESTINOS;
 
   constructor(private servidor: Servidor, public authService: AuthService) {}
 
   get esAdmin(): boolean {
-    return this.authService.rol === 'ADMIN';
+    return this.authService.rol === 'ADMIN'; 
   }
 
   get esOperador(): boolean {
@@ -55,38 +55,60 @@ export class ListarL implements OnInit {
 
   cargarLotes() {
     this.loading = true;
-    this.error = '';
+    this.errores = [];
 
     // Hacemos una petición para obtener los lotes, productos y proveedores en paralelo
     // Con forkJoin() podemos realizar varias peticiones en paralelo
     forkJoin({
-      lotes: this.servidor.listarLotes(),
-      productos: this.servidor.listarProductos(),
-      proveedores: this.servidor.listarProveedores()
+      lotes: this.servidor.listarLotes().pipe(
+        catchError(() => {
+          this.errores.push('No se pudo cargar lotes');
+          return of([])
+        }) // Si la petición falla, devolvemos un array vacío
+      ), 
+      productos: this.servidor.listarProductos().pipe(
+        catchError(() => {
+          this.errores.push('No se pudo cargar productos'); 
+          return of([]) // Con of([]) cada peticion que falla se convierte en un array vacio
+        })
+      ),
+      proveedores: this.servidor.listarProveedores().pipe(
+        catchError(() => {
+          this.errores.push('No se pudo cargar proveedores'); 
+          return of([]) // Si la petición falla, devolvemos un array vacío
+      })
+      )
     }).subscribe({
       next: (data) => {
         this.lotes = Array.isArray(data.lotes) ? data.lotes : []; // Convertir a un array si no lo es (cuando no llega un array/ no llega nada/ llega null) y en caso que no lo sea poner un array vacio 
         this.productos = Array.isArray(data.productos) ? data.productos : [];
         this.proveedores = Array.isArray(data.proveedores) ? data.proveedores : [];
         this.filtrarLotes(); // Llamar a la función para filtrar los lotes
-        this.loading = false;
+        this.loading = false
       },
       error: (err) => {
-        this.error = 'Error al cargar datos';
+        this.errores.push('Error al cargar datos');
         this.loading = false;
         console.error(err);
       },
     });
   }
 
+  // Para cerrar un error individual
+  cerrarError(index: number) {
+    this.errores.splice(index, 1);
+  }
+
   // Metodo para obtener el nombre de un producto dado su id
   getProductoNombre(id: number): string { // id es el id del producto que queremos obtener
+    if (!this.productos.length) return 'No se pudo cargar productos'; // si el array de productos esta vacio, se devuelve un string con el id del producto
     const producto = this.productos.find(p => p.id === id); // con find() buscamos el producto en el array de productos
     return producto?.nombre || `Producto ${id}`; // si el producto no se encuentra en el array, se devuelve un string con el id del producto
   }
 
   // Metodo para obtener el nombre de un proveedor dado su id
   getProveedorNombre(id: number): string { // id es el id del proveedor que queremos obtener
+    if (!this.proveedores.length) return 'No se pudo cargar proveedores'; // si el array de proveedores esta vacio, se devuelve un string con el id del proveedor
     const proveedor = this.proveedores.find(p => p.id === id); // con find() buscamos el proveedor en el array de proveedores
     return proveedor?.nombre || `Proveedor ${id}`; // si el proveedor no se encuentra en el array, se devuelve un string con el id del proveedor
   }
@@ -112,7 +134,7 @@ filtrarLotes() {
   cambiarEstado(lote: Lote, nuevoEstado: CambiarEstadoLoteDto['estado'], observaciones?: string) {
     this.servidor.editarEstadoLote(lote.id, { 
       estado: nuevoEstado, 
-      observaciones: observaciones || undefined 
+      observaciones: observaciones
     }).subscribe({
       next: (loteActualizado) => {
         lote.estado = loteActualizado.estado;
@@ -255,18 +277,8 @@ filtrarLotes() {
     // Mandamos el movimiento
     this.servidor.registrarMovimiento(movimiento).subscribe({
       next: () => {
-        // Calcular y actualizar la cantidad en el array principal
-        const cantidadRestante = this.loteSeleccionado!.cantidad_actual - this.cantidadSalida!;
-        const loteIndex = this.lotes.findIndex(l => l.id === this.loteSeleccionado!.id);
-        if (loteIndex !== -1) {
-          this.lotes[loteIndex].cantidad_actual = cantidadRestante;
-          if (cantidadRestante === 0) {
-            this.lotes[loteIndex].estado = 'AGOTADO';
-          }
-        }
-
-        // Actualizamos la lista de lotes
-        this.filtrarLotes();
+        // Recargar lotes del servidor (ya tiene la cantidad_actual actualizada)
+        this.cargarLotes();
         this.cerrarModalSalida();
         alert('Salida registrada correctamente');
         this.loadingSalida = false;

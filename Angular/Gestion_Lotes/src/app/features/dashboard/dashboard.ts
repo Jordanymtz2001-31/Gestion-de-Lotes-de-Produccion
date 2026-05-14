@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { forkJoin } from 'rxjs';
+import { catchError, forkJoin, of } from 'rxjs';
 import { AuthService } from '../../core/interceptors/authService';
 import { Lote } from '../../shared/models/lote';
 import { Servidor } from '../../core/services/servidor';
@@ -24,6 +24,8 @@ export class Dashboard implements OnInit {
   totalLotes = 0;
   lotesRevision = 0;
   lotesAprobados = 0;
+
+  errores: string[] = []; // Creamos un array de errores para mostrarlos en la vista
 
   // Creamos un array de lotes recientes que vien de la base de datos
   lotesRecientes: Lote[] = [];
@@ -54,8 +56,18 @@ export class Dashboard implements OnInit {
     // Hacemos una petición para obtener los productos y lotes en paralelo
     // Con forkJoin() podemos realizar varias peticiones en paralelo
     forkJoin({
-      productos: this.service.listarProductos(),
-      lotes: this.service.listarLotes()
+      productos: this.service.listarProductos().pipe(
+        catchError(() => {
+          this.errores.push('No se pudo cargar productos'); 
+          return of([]) // Si la petición falla, devolvemos un array vacío
+        }),
+      ),
+      lotes: this.service.listarLotes().pipe(
+        catchError(() => {
+          this.errores.push('No se pudo cargar lotes'); 
+          return of([])
+      }),
+      ),
     }).subscribe({
       next: (data) => {
         this.productos = Array.isArray(data.productos) ? data.productos : []; // Convertir a un array si no lo es (cuando no llega un array/ no llega nada/ llega null) y en caso que no lo sea poner un array vacio
@@ -68,13 +80,19 @@ export class Dashboard implements OnInit {
         this.lotesRecientes = lotes.slice(0, 10);
       },
       error: (err) => {
-        console.error('Error al cargar datos:', err);
+        this.errores.push('Error al cargar datos');
       },
     });
   }
 
+    // Para cerrar un error individual
+  cerrarError(index: number) {
+    this.errores.splice(index, 1);
+  }
+
   // Función para obtener el nombre de un producto dado su ID
   getProductoNombre(productoId: number): string {
+    if (!this.productos.length) return 'No se pudo cargar productos';
     const producto = this.productos.find(p => p.id === productoId);
     return producto?.nombre || `Producto ${productoId}`;
   }

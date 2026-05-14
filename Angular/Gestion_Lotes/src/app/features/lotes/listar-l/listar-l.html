@@ -40,13 +40,24 @@
   </div>
   }
 
-  <!-- Error -->
-  @if (error) {
-  <div class="alert alert-danger">{{ error }}</div>
-  }
+<!-- Error como alerta arriba, no bloquea la tabla -->
+@for (err of errores; track $index) {
+  <div class="alert alert-warning d-flex align-items-center justify-content-between mb-2">
+    <span>
+      <i class="ti ti-alert-triangle me-2" aria-hidden="true"></i>
+      {{ err }}
+    </span>
+    <button
+      type="button"
+      class="btn-close"
+      (click)="cerrarError($index)"
+      aria-label="Cerrar">
+    </button>
+  </div>
+}
 
   <!-- Table -->
-  @if (!loading && !error) {
+  @if (!loading) {
   <div class="table-container">
     <div class="table-responsive">
       <table class="table table-hover mb-0">
@@ -74,12 +85,17 @@
             <td>{{ getProveedorNombre(lote.proveedor_id) }}</td>
             <td>{{ lote.cantidad_inicial }}</td>
             <td>
-              <span [ngClass]="{'text-danger': lote.cantidad_actual === 0}">
+              <span [ngClass]="{'text-danger': lote.estado === 'AGOTADO'}">
                 {{ lote.cantidad_actual }}
               </span>
             </td>
             <td>
-              <span class="badge">
+              <span class="badge"
+              [class.bg-warning]="lote.estado === 'REVISION'"
+              [class.text-dark]="lote.estado === 'REVISION'"
+              [class.bg-success]="lote.estado === 'APROBADO'"
+              [class.bg-danger]="lote.estado  === 'RECHAZADO'"
+              [class.bg-secondary]="lote.estado === 'AGOTADO'">
                 {{ lote.estado }}
               </span>
             </td>
@@ -93,6 +109,18 @@
               <button class="btn btn-sm btn-outline-primary" (click)="abrirModalSalida(lote)">
                 <i class="bi bi-box-arrow-up me-1"></i> Salida
               </button>
+              }<!--Si es rechado solo moestradmos un pequeño mensaje-->
+              @if (lote.estado === 'RECHAZADO' && (esAdmin || esOperador || esSupervisor)) {
+              <span class="text-danger">N/A</span>
+              }
+              @if (lote.estado === 'AGOTADO' && (esAdmin || esOperador || esSupervisor)) {
+              <span class="text-danger">N/A</span>
+              }
+              @if (lote.estado === 'REVISION' && (esOperador)) {
+              <span class="text-danger">N/A</span>
+              }
+              @if (lote.estado === 'APROBADO' && (esSupervisor)) {
+              <span class="text-danger">N/A</span>
               }
             </td>
           </tr>

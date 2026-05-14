@@ -89,6 +89,22 @@
     </div>
   </div>
 
+<!-- Error como alerta arriba, no bloquea la tabla -->
+@for (err of errores; track $index) {
+  <div class="alert alert-warning d-flex align-items-center justify-content-between mb-2">
+    <span>
+      <i class="ti ti-alert-triangle me-2" aria-hidden="true"></i>
+      {{ err }}
+    </span>
+    <button
+      type="button"
+      class="btn-close"
+      (click)="cerrarError($index)"
+      aria-label="Cerrar">
+    </button>
+  </div>
+}
+
   <!-- Lotes Recientes -->
   <div class="row">
     <div class="col-12">
@@ -113,8 +129,18 @@
               <tr>
                 <td>{{ lote.codigo_lote }}</td>
                 <td>{{ getProductoNombre(lote.producto_id) }}</td>
-                <td>{{ lote.cantidad_actual }}</td>
-                <td>{{ lote.estado}}</td>
+                <!-- Mostramos una advertencia en la cantidad cuandp el estado sea AGOTADO -->
+                <td [ngClass]="{'text-danger': lote.estado === 'AGOTADO'}">{{ lote.cantidad_actual }}</td>
+                <td>
+                  <span class="badge"
+                  [class.bg-warning]="lote.estado === 'REVISION'"
+                  [class.text-dark]="lote.estado === 'REVISION'"
+                  [class.bg-success]="lote.estado === 'APROBADO'"
+                  [class.bg-danger]="lote.estado  === 'RECHAZADO'"
+                  [class.bg-secondary]="lote.estado === 'AGOTADO'">
+                    {{ lote.estado }}
+                  </span>
+                </td>
                 <td>{{ lote.fecha_entrada | date:'short' }}</td>
               </tr>
               }

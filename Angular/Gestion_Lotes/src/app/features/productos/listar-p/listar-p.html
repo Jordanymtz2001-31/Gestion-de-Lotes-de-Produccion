@@ -43,10 +43,10 @@
           <tr>
             <th style="width: 60px">ID</th>
             <th style="width: 150px">Código</th>
-            <th>Nombre</th>
-            <th>Descripción</th>
+            <th style="width: auto;">Nombre</th>
+            <th style="width: auto;">Descripción</th>
             <th style="width: 100px">Unidad</th>
-            <th style="width: 80px">Stock</th>
+            <th style="width: 100px">Stock</th>
             @if (esAdmin) {
             <th style="width: 100px">Acciones</th>
             }
@@ -61,7 +61,14 @@
             </td>
             <td class="fw-medium">{{ producto.nombre }}</td>
             <td class="text-muted">{{ producto.descripcion || '------------' }}</td>
-            <td>{{ producto.unidad_medida }}</td>
+            <td>
+              <span class="badge"
+                [class.bg-warning]="producto.unidad_medida === 'METRO'"
+                [class.bg-primary]="producto.unidad_medida === 'KG'"
+                [class.bg-danger]="producto.unidad_medida === 'ROLLO'"]>
+              {{ producto.unidad_medida }}
+              </span>
+            </td>
             <td>
               <span
                 class="badge"

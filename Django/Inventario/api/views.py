@@ -70,7 +70,7 @@ class LoteViewSet(viewsets.ModelViewSet):
                 tipo='ENTRADA',
                 cantidad=lote.cantidad_inicial,
                 destino=None, # No aplica
-                observaciones='Lote registrado en revisión'
+                observaciones='Lote registrado por el operador'
             )
             
         return Response(LoteSerializer(lote).data, status=status.HTTP_201_CREATED)
