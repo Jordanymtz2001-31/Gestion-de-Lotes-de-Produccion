@@ -19,4 +19,5 @@ export interface EditarLoteDto extends CrearLoteDto {
 // Solo para cambiar el estado y mandarlo al backend 
 export interface CambiarEstadoLoteDto {
     estado: Lote['estado']; // Reutilizamos el tipo estricto
+    observaciones?: string; // opcional — solo se usa al rechazar
 }

@@ -56,7 +56,7 @@ class Movimiento(models.Model):
         ('COMPRA',          'Compra'),
         ('INGRESO_ALMACEN', 'Ingreso al almacen'),
     ]
-    destino = models.CharField(max_length=100, null=True, blank=True)
+    destino = models.CharField(max_length=100, null=True, blank=True) # Lo dejamos nulo por que al crear un lote no se le asigna ningun destino
     observaciones = models.TextField(null=True, blank=True)
     fecha = models.DateTimeField(auto_now_add=True)
 

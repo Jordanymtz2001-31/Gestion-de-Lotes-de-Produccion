@@ -32,19 +32,21 @@
   </div>
 
   <!-- Loading -->
-   @if (loading) {
+  @if (loading) {
   <div class="loading-container">
     <div class="spinner-border spinner-primary" role="status">
       <span class="visually-hidden">Cargando...</span>
     </div>
   </div>
   }
+
   <!-- Error -->
-   @if (error) {
+  @if (error) {
   <div class="alert alert-danger">{{ error }}</div>
   }
+
   <!-- Table -->
-   @if (!loading && !error) {
+  @if (!loading && !error) {
   <div class="table-container">
     <div class="table-responsive">
       <table class="table table-hover mb-0">
@@ -58,9 +60,7 @@
             <th style="width: 100px">Cant. Actual</th>
             <th style="width: 120px">Estado</th>
             <th style="width: 140px">Fecha Entrada</th>
-            @if (esSupervisor || esAdmin) {
-            <th style="width: 100px">Acciones</th>
-            }
+            <th style="width: 140px">Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -84,24 +84,17 @@
               </span>
             </td>
             <td class="text-muted">{{ lote.fecha_entrada | date:'short' }}</td>
-            @if (esSupervisor || esAdmin) {
             <td>
-              @if (lote.estado === 'REVISION') { <!-- Si el lote está en revisión mostrar el dropdown -->
-              <div class="dropdown">
-                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
-                  Cambiar
-                </button>
-                <ul class="dropdown-menu">
-                  <li><a class="dropdown-item" (click)="cambiarEstado(lote, 'APROBADO')">Aprobar</a></li>
-                  <li><a class="dropdown-item" (click)="cambiarEstado(lote, 'RECHAZADO')">Rechazar</a></li>
-                </ul>
-              </div>
+              @if (lote.estado === 'REVISION' && (esSupervisor || esAdmin)) {
+              <button class="btn btn-sm btn-success me-1" (click)="abrirModalAprobacion(lote)">Aprobar</button>
+              <button class="btn btn-sm btn-danger" (click)="abrirModalRechazo(lote)">Rechazar</button>
               }
-              @if (lote.estado !== 'REVISION') {
-              <span class="text-muted">—</span>
+              @if (lote.estado === 'APROBADO' && puedeCrear) {
+              <button class="btn btn-sm btn-outline-primary" (click)="abrirModalSalida(lote)">
+                <i class="bi bi-box-arrow-up me-1"></i> Salida
+              </button>
               }
             </td>
-            }
           </tr>
           }
           @if (lotesFiltrados.length === 0) {
@@ -118,3 +111,116 @@
   </div>
   }
 </div>
+
+<!-- Modal Salida -->
+@if (mostrarModalSalida) {
+<div class="modal-overlay" (click)="cerrarModalSalida()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h5 class="modal-title">Registrar Salida</h5>
+      <button type="button" class="btn-close" (click)="cerrarModalSalida()"></button>
+    </div>
+    <div class="modal-body">
+      <div class="mb-3">
+        <label class="form-label">Lote</label>
+        <input type="text" class="form-control" [value]="loteSeleccionado?.codigo_lote" disabled />
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Stock Disponible</label>
+        <input type="text" class="form-control" [value]="loteSeleccionado?.cantidad_actual" disabled />
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Cantidad <span class="text-danger">*</span></label>
+        <input type="number" class="form-control" [(ngModel)]="cantidadSalida" min="1" />
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Destino <span class="text-danger">*</span></label>
+        <select class="form-select" [(ngModel)]="destinoSalida">
+          <option value="">Seleccione un destino</option>
+          @for (destino of destinosSalida; track destino.value) {
+          <option [value]="destino.value">{{ destino.label }}</option>
+          }
+        </select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Observaciones</label>
+        <textarea class="form-control" rows="2" [(ngModel)]="observacionesSalida" placeholder="Opcional"></textarea>
+      </div>
+      @if (errorSalida) {
+      <div class="alert alert-danger mb-0">{{ errorSalida }}</div>
+      }
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="cerrarModalSalida()" [disabled]="loadingSalida">Cancelar</button>
+      <button type="button" class="btn btn-primary" (click)="registrarSalida()" [disabled]="loadingSalida">
+        @if (loadingSalida) {
+        <span class="spinner-border spinner-border-sm me-2"></span>
+        }
+        Registrar
+      </button>
+    </div>
+  </div>
+</div>
+}
+
+<!-- Modal Aprobación -->
+@if (mostrarModalAprobacion) {
+<div class="modal-overlay" (click)="cerrarModalAprobacion()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h5 class="modal-title">Confirmar Aprobación</h5>
+      <button type="button" class="btn-close" (click)="cerrarModalAprobacion()"></button>
+    </div>
+    <div class="modal-body">
+      <p>Lote: <strong>{{ loteSeleccionadoAprobacion?.codigo_lote }}</strong></p>
+      <div class="mb-3">
+        <label class="form-label">Observaciones (opcional)</label>
+        <textarea class="form-control" rows="3" [(ngModel)]="observacionesAprobacion" placeholder="Agregue observaciones si lo desea"></textarea>
+      </div>
+      @if (errorAprobacion) {
+      <div class="alert alert-danger mb-0">{{ errorAprobacion }}</div>
+      }
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="cerrarModalAprobacion()" [disabled]="loadingAprobacion">Cancelar</button>
+      <button type="button" class="btn btn-success" (click)="confirmaAprobacion()" [disabled]="loadingAprobacion">
+        @if (loadingAprobacion) {
+        <span class="spinner-border spinner-border-sm me-2"></span>
+        }
+        Confirmar
+      </button>
+    </div>
+  </div>
+</div>
+}
+
+<!-- Modal Rechazo -->
+@if (mostrarModalRechazo) {
+<div class="modal-overlay" (click)="cerrarModalRechazo()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h5 class="modal-title">Confirmar Rechazo</h5>
+      <button type="button" class="btn-close" (click)="cerrarModalRechazo()"></button>
+    </div>
+    <div class="modal-body">
+      <p>Lote: <strong>{{ loteSeleccionadoRechazo?.codigo_lote }}</strong></p>
+      <div class="mb-3">
+        <label class="form-label">Motivo del rechazo <span class="text-danger">*</span></label>
+        <textarea class="form-control" rows="3" [(ngModel)]="motivoRechazo" placeholder="Indique la razón del rechazo"></textarea>
+      </div>
+      @if (errorRechazo) {
+      <div class="alert alert-danger mb-0">{{ errorRechazo }}</div>
+      }
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="cerrarModalRechazo()" [disabled]="loadingRechazo">Cancelar</button>
+      <button type="button" class="btn btn-danger" (click)="confirmaRechazo()" [disabled]="loadingRechazo">
+        @if (loadingRechazo) {
+        <span class="spinner-border spinner-border-sm me-2"></span>
+        }
+        Rechazar
+      </button>
+    </div>
+  </div>
+</div>
+}

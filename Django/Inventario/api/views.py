@@ -97,7 +97,10 @@ class LoteViewSet(viewsets.ModelViewSet):
             'Host' : 'localhost'
         }
 
-        with transaction.atomic(): # Esto me ayuda que si falla el movimiento no se cree el lote para ambos casos
+        # Obtenemos las observaciones al crear el movimiento en caso de que las haya
+        observaciones = request.data.get('observaciones')
+
+        with transaction.atomic():  # Esto me ayuda que si falla el movimiento no se cree el lote para ambos casos
 
             # Solo actualizamos stock si pasa de REVISION a APROBADO
             # Cualquier otro cambio de estado no toca el stock
@@ -106,8 +109,8 @@ class LoteViewSet(viewsets.ModelViewSet):
                 producto = verificar_producto(lote.producto_id, user_headers)
                 if not producto['Valido']:
                     raise Exception(producto['error'])
-                
-                # Actualizamos el stock del producto
+
+                # Actualizamos el stock
                 actualizacion = actualizar_stock_producto(
                     lote.producto_id,
                     float(lote.cantidad_inicial),
@@ -118,13 +121,15 @@ class LoteViewSet(viewsets.ModelViewSet):
                 if not actualizacion['Valido']:
                     raise Exception(actualizacion['error'])
 
+                # Si en observaciones viene algo, usamos eso, sino usamos el default
+                obs = observaciones if observaciones else 'Lote aprobado por supervisor'
                 crear_movimiento(
                     lote=lote,
                     usuario_id=int(request.user_id),
                     tipo='ENTRADA',
                     cantidad=lote.cantidad_inicial,
                     destino='INGRESO_ALMACEN',
-                    observaciones='Lote aprobado por supervisor'
+                    observaciones=obs
                 )
 
             if nuevo_estado == "RECHAZADO" and lote.estado == "APROBADO":
@@ -143,13 +148,15 @@ class LoteViewSet(viewsets.ModelViewSet):
                 if not actualizacion['Valido']:
                     raise Exception(actualizacion['error'])
 
+                # Si en observaciones viene algo, usamos eso, sino usamos el default
+                obs = observaciones if observaciones else 'Lote rechazado por supervisor'
                 crear_movimiento(
                     lote=lote,
                     usuario_id=int(request.user_id),
                     tipo='SALIDA',
                     cantidad=lote.cantidad_actual,
                     destino='DEVOLUCION_PROV',
-                    observaciones='Lote rechazado por supervisor'
+                    observaciones=obs
                 )
 
         return super().partial_update(request, *args, **kwargs)
@@ -159,6 +166,18 @@ class LoteViewSet(viewsets.ModelViewSet):
 class MovimientoViewSet(viewsets.ModelViewSet):
     queryset = Movimiento.objects.all()
     serializer_class = MovimientoSerializer
+
+    # Creamos una funcion para filtrar la lista de movimientos segun el rol
+    # En ves de realizarlo en la base de datos, lo hacemos en el frontend
+    def get_queryset(self):
+        # Obtenemos los headers de la peticion
+        rol = self.request.user_rol
+        user_id = self.request.user_id
+
+        if rol in ["ADMIN", "SUPERVISOR"]:
+            return Movimiento.objects.all() # Admin y supervisor pueden ver todos
+
+        return Movimiento.objects.filter(usuario_id=user_id) # Operador solo puede ver sus movimientos
 
     def create(self, request, *args, **kwargs):
         # Cualquier usuario autenticado puede crear una salida

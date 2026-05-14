@@ -9,6 +9,8 @@ import { CrearProductoDto, EditarProductoDto } from '../../shared/models/product
 import { CrearUsuarioDto, EditarUsuarioDto } from '../../shared/models/usuarioDto';
 import { CrearProveedorDto, EditarProveedorDto } from '../../shared/models/proveedorDto';
 import { CambiarEstadoLoteDto, CrearLoteDto, EditarLoteDto } from '../../shared/models/loteDto';
+import { Movimiento } from '../../shared/models/movimiento';
+import { CrearMovimientoDto } from '../../shared/models/movimientoDto';
 
 @Injectable({
   providedIn: 'root',
@@ -102,6 +104,11 @@ export class Servidor {
   }
 
   eliminarLote(id: number) {
-    return this.http.delete<void>(this.BASE_ULR + '/lotes/' + id + '/'); // colocamos el void por que no esperamos un body solo un estaus 204 que significa que se elimino en el backend
-  }                                                                 // La resputa de eliminacion lo manejare en el componente
+    return this.http.delete<void>(this.BASE_ULR + '/lotes/' + id + '/');
+  }
+
+  //----------------------------------------------------------MOVIMIENTOS--------------------------------------------------------------
+  registrarMovimiento(movimiento: CrearMovimientoDto) {
+    return this.http.post<Movimiento>(this.BASE_ULR + '/movimientos/', movimiento);
+  }
 }
