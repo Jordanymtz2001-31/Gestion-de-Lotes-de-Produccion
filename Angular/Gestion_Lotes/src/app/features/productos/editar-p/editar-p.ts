@@ -2,9 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import Swal from 'sweetalert2';
 import { Servidor } from '../../../core/services/servidor';
 import { Producto, UNIDADES_MEDIDA } from '../../../shared/models/producto';
 import { EditarProductoDto } from '../../../shared/models/productoDto';
+import { getMensajeError } from '../../../core/utils/utils';
 
 @Component({
   selector: 'app-editar-p',
@@ -27,15 +29,10 @@ export class EditarP implements OnInit {
 
   loading = false;
   error = '';
-  success = '';
-
-  unidades = UNIDADES_MEDIDA; // Creamos una array constante de las unidades de medida que tenemos en el modelo
-
-  // Solo para mostrar en pantalla — no se edita
+  unidades = UNIDADES_MEDIDA;
   stockActual: number = 0;
 
-  constructor(private servidor: Servidor, private router: Router, private route: ActivatedRoute
-  ) {}
+  constructor(private servidor: Servidor, private router: Router, private route: ActivatedRoute) {}
 
   ngOnInit() {
     // Obtenemos el id de la url
@@ -53,9 +50,8 @@ export class EditarP implements OnInit {
         this.loading = false;
       },
       error: (err) => {
-        this.error = 'Error al cargar producto';
+        this.error = getMensajeError(err);
         this.loading = false;
-        console.error(err);
       },
     });
   }
@@ -68,20 +64,47 @@ export class EditarP implements OnInit {
 
     this.loading = true;
     this.error = '';
-    this.success = '';
 
+    Swal.fire({
+      title: '¿Confirmas la actualización del producto?',
+      icon: 'question',
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, actualizar',
+      cancelButtonText: 'Cancelar',
+      allowOutsideClick: false,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.actualizarProducto();
+      } else {
+        this.loading = false;
+      }
+    });
+  }
+
+  actualizarProducto() {
     this.servidor.editarProducto(this.productoDto).subscribe({
       next: () => {
-        this.success = 'Producto actualizado correctamente';
         this.loading = false;
-        setTimeout(() => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Producto actualizado',
+          text: 'El producto se actualizó correctamente',
+          showConfirmButton: false,
+          timer: 2000,
+        }).then(() => {
           this.router.navigate(['/listar-productos']);
-        }, 1500);
+        });
       },
       error: (err) => {
         this.loading = false;
-        this.error = err.error?.error || 'Error al actualizar producto';
-        console.error(err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al actualizar producto',
+          text: getMensajeError(err),
+          showConfirmButton: false,
+          showCloseButton: true,
+        });
       },
     });
   }

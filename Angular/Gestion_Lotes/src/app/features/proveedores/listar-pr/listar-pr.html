@@ -14,7 +14,7 @@
     <input
       type="text"
       class="form-control search-input"
-      placeholder="Buscar por nombre o email..."
+      placeholder="Buscar por nombre"
       [(ngModel)]="busqueda"
       (input)="filtrarProveedores()" 
     /> <!-- (input)="filtrarProveedores()" es para que se ejecute la función filtrarProveedores() al escribir en el input-->
@@ -51,7 +51,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (proveedor of proveedores; track proveedor.id) {
+          @for (proveedor of proveedoresFiltrados; track proveedor.id) {
           <tr>
             <td class="text-muted">{{ proveedor.id }}</td>
             <td class="fw-medium">{{ proveedor.nombre }}</td>

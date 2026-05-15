@@ -31,10 +31,15 @@
                 required
               >
                 <option [value]="0" disabled>Seleccionar producto</option>
-                @for (p of productos; track p.id) {
-                <option [value]="p.id">
-                  {{ p.nombre }} ({{ p.codigo }})
-                </option>
+                @if (productos.length == 0 ) {
+                <option [value]="0" disabled>No hay productos disponibles</option>
+                }
+                @else {
+                  @for (p of productos; track p.id) {
+                  <option [value]="p.id">
+                    {{ p.nombre }} ({{ p.codigo }})
+                  </option>
+                  }
                 }
               </select>
             </div>
@@ -49,10 +54,15 @@
                 required
               >
                 <option [value]="0" disabled>Seleccionar proveedor</option>
-                @for (pr of proveedores; track pr.id) {
-                <option [value]="pr.id">
-                  {{ pr.nombre }}
-                </option>
+                @if (proveedores.length == 0) {
+                <option [value]="0" disabled>No hay proveedores disponibles</option>
+                }
+                @else{
+                  @for (pr of proveedores; track pr.id) {
+                  <option [value]="pr.id">
+                    {{ pr.nombre }}
+                  </option>
+                }
                 }
               </select>
             </div>

@@ -63,15 +63,15 @@
       <table class="table table-hover mb-0">
         <thead>
           <tr>
-            <th style="width: 80px">ID</th>
-            <th style="width: 140px">Código</th>
+            <th style="width: 50px">ID</th>
+            <th style="width: 130px">Código</th>
             <th style="width: 160px">Producto</th>
             <th style="width: 160px">Proveedor</th>
             <th style="width: 100px">Cant. Inicial</th>
             <th style="width: 100px">Cant. Actual</th>
-            <th style="width: 120px">Estado</th>
+            <th style="width: 100px">Estado</th>
             <th style="width: 140px">Fecha Entrada</th>
-            <th style="width: 140px">Acciones</th>
+            <th style="width: 100px">Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -81,12 +81,13 @@
             <td>
               <code class="font-mono">{{ lote.codigo_lote }}</code>
             </td>
+            <!-- Nombre y unidad de producto -->  
             <td>{{ getProductoNombre(lote.producto_id) }}</td>
             <td>{{ getProveedorNombre(lote.proveedor_id) }}</td>
             <td>{{ lote.cantidad_inicial }}</td>
             <td>
               <span [ngClass]="{'text-danger': lote.estado === 'AGOTADO'}">
-                {{ lote.cantidad_actual }}
+                {{ lote.cantidad_actual }}  {{ getUnidadProducto(lote.producto_id) }}
               </span>
             </td>
             <td>
@@ -102,8 +103,12 @@
             <td class="text-muted">{{ lote.fecha_entrada | date:'short' }}</td>
             <td>
               @if (lote.estado === 'REVISION' && (esSupervisor || esAdmin)) {
-              <button class="btn btn-sm btn-success me-1" (click)="abrirModalAprobacion(lote)">Aprobar</button>
-              <button class="btn btn-sm btn-danger" (click)="abrirModalRechazo(lote)">Rechazar</button>
+              <button class="btn btn-sm btn-outline-success me-1" (click)="abrirModalAprobacion(lote)">
+                <i class="bi bi-check-lg me-1"></i>Aprobar
+              </button>
+              <button class="btn btn-sm btn-outline-danger" (click)="abrirModalRechazo(lote)">
+                <i class="bi bi-x-lg me-1"></i>Rechazar
+              </button>
               }
               @if (lote.estado === 'APROBADO' && puedeCrear) {
               <button class="btn btn-sm btn-outline-primary" (click)="abrirModalSalida(lote)">

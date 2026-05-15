@@ -2,9 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import Swal from 'sweetalert2';
 import { Servidor } from '../../../core/services/servidor';
 import { ROLES, Usuario } from '../../../shared/models/usuario';
 import { EditarUsuarioDto } from '../../../shared/models/usuarioDto';
+import { getMensajeError } from '../../../core/utils/utils';
 
 @Component({
   selector: 'app-editar-u',
@@ -26,11 +28,9 @@ export class EditarU implements OnInit {
 
   loading = false;
   error = '';
-  success = '';
-
   roles = ROLES;
 
-  constructor(private servidor: Servidor, private router: Router,private route: ActivatedRoute) {}
+  constructor(private servidor: Servidor, private router: Router, private route: ActivatedRoute) {}
 
   ngOnInit() {
     // Obtenemos el id de la url
@@ -46,12 +46,11 @@ export class EditarU implements OnInit {
     this.servidor.buscarUsuario(this.usuario.id).subscribe({
       next: (usuario) => {
         this.usuario = usuario;
-        this.loading = false; // Una vez cargado el usuario, ocultamos el spinner
+        this.loading = false;
       },
       error: (err) => {
-        this.error = 'Error al cargar usuario';
+        this.error = getMensajeError(err);
         this.loading = false;
-        console.error(err);
       },
     });
   }
@@ -64,28 +63,47 @@ export class EditarU implements OnInit {
 
     this.loading = true;
     this.error = '';
-    this.success = '';
 
-    /* No enviamos password en edición (solo en creación)
-    const datosActualizar = {
-      username: this.usuario.username,
-      email: this.usuario.email,
-      rol: this.usuario.rol
-    };
-    */
+    Swal.fire({
+      title: '¿Confirmas la actualización del usuario?',
+      icon: 'question',
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, actualizar',
+      cancelButtonText: 'Cancelar',
+      allowOutsideClick: false,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.actualizarUsuario();
+      } else {
+        this.loading = false;
+      }
+    });
+  }
 
+  actualizarUsuario() {
     this.servidor.editarUsuario(this.usuario).subscribe({
       next: () => {
-        this.success = 'Usuario actualizado correctamente';
         this.loading = false;
-        setTimeout(() => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Usuario actualizado',
+          text: 'El usuario se actualizó correctamente',
+          showConfirmButton: false,
+          timer: 2000,
+        }).then(() => {
           this.router.navigate(['/listar-usuarios']);
-        }, 1500);
+        });
       },
       error: (err) => {
         this.loading = false;
-        this.error = err.error?.error || 'Error al actualizar usuario';
-        console.error(err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al actualizar usuario',
+          text: getMensajeError(err),
+          showConfirmButton: false,
+          showCloseButton: true,
+        });
       },
     });
   }

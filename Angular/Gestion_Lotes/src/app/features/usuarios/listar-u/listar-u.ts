@@ -2,8 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import Swal from 'sweetalert2';
 import { Servidor } from '../../../core/services/servidor';
 import { Usuario } from '../../../shared/models/usuario';
+import { getMensajeError } from '../../../core/utils/utils';
 
 @Component({
   selector: 'app-listar-u',
@@ -37,9 +39,8 @@ export class ListarU implements OnInit {
         this.loading = false;
       },
       error: (err) => {
-        this.error = 'Error al cargar usuarios';
+        this.error = getMensajeError(err);
         this.loading = false;
-        console.error(err);
       },
     });
   }
@@ -54,22 +55,43 @@ export class ListarU implements OnInit {
   }
 
   eliminarUsuario(id: number) {
-    if (!confirm('¿Está seguro de eliminar este usuario?')) {
-      return;
-    }
-
-    this.servidor.eliminarUsuario(id).subscribe({
-      next: () => {
-        // Eliminar el Usuario de la lista
-        this.usuarios = this.usuarios.filter((u) => u.id !== id);
-        this.filtrarUsuarios(); // Actualizar la lista de Usuarios
-        alert('Usuario eliminado correctamente');
-      },
-      error: (err) => {
-        alert('Error al eliminar Usuario');
-        console.error(err);
-      },
+    Swal.fire({
+      title: '¿Estás seguro de que deseas eliminar este usuario?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.eliminar(id);
+      }
     });
   }
 
+  eliminar(id: number) {
+    this.servidor.eliminarUsuario(id).subscribe({
+      next: () => {
+        this.usuarios = this.usuarios.filter((u) => u.id !== id);
+        this.filtrarUsuarios();
+        Swal.fire({
+          icon: 'success',
+          title: 'Usuario eliminado',
+          text: 'El usuario se eliminó correctamente',
+          showConfirmButton: false,
+          timer: 2000,
+        });
+      },
+      error: (err) => {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al eliminar usuario',
+          text: getMensajeError(err),
+          showConfirmButton: false,
+          showCloseButton: true,
+        });
+      },
+    });
+  }
 }

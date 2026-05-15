@@ -110,7 +110,7 @@ class LoteViewSet(viewsets.ModelViewSet):
 
                 producto = verificar_producto(lote.producto_id, user_headers)
                 if not producto['Valido']:
-                    raise Exception(producto['error'])
+                    return Response({'error':producto['error']}, status=status.HTTP_400_BAD_REQUEST)
 
                 # Actualizamos el stock
                 actualizacion = actualizar_stock_producto(
@@ -121,7 +121,7 @@ class LoteViewSet(viewsets.ModelViewSet):
                 )
 
                 if not actualizacion['Valido']:
-                    raise Exception(actualizacion['error'])
+                    return Response({'error':actualizacion['error']}, status=status.HTTP_400_BAD_REQUEST)
 
                 # Si en observaciones viene algo, usamos eso, sino usamos el default
                 obs = observaciones if observaciones else 'Lote aprobado por supervisor'
@@ -138,7 +138,7 @@ class LoteViewSet(viewsets.ModelViewSet):
 
                 producto = verificar_producto(lote.producto_id, user_headers)
                 if not producto['Valido']:
-                    raise Exception(producto['error'])
+                    return Response({'error':producto['error']}, status=status.HTTP_400_BAD_REQUEST)
 
                 actualizacion = actualizar_stock_producto(
                     lote.producto_id,
@@ -148,7 +148,7 @@ class LoteViewSet(viewsets.ModelViewSet):
                 )
 
                 if not actualizacion['Valido']:
-                    raise Exception(actualizacion['error'])
+                    return Response({'error':actualizacion['error']}, status=status.HTTP_400_BAD_REQUEST)
 
                 # Si en observaciones viene algo, usamos eso, sino usamos el default
                 obs = observaciones if observaciones else 'Lote rechazado por supervisor'

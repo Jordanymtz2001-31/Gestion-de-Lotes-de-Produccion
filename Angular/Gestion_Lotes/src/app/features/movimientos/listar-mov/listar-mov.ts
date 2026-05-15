@@ -1,12 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { forkJoin } from 'rxjs';
+import { catchError, forkJoin, of } from 'rxjs';
+import Swal from 'sweetalert2';
 import { Servidor } from '../../../core/services/servidor';
 import { AuthService } from '../../../core/interceptors/authService';
 import { Movimiento, TODOS_DESTINOS, TIPOS_MOVIMIENTO } from '../../../shared/models/movimiento';
 import { Lote } from '../../../shared/models/lote';
 import { Usuario } from '../../../shared/models/usuario';
+import { getMensajeError } from '../../../core/utils/utils';
 
 @Component({
   selector: 'app-listar-mov',
@@ -34,32 +36,45 @@ export class ListarMov implements OnInit {
   constructor(private servidor: Servidor, public authService: AuthService) {}
 
   get esAdmin(): boolean {
-    return this.authService.rol === 'ADMIN';
+    return this.authService.usuarioActual()?.rol === 'ADMIN';
   }
 
   get esSupervisor(): boolean {
-    return this.authService.rol === 'SUPERVISOR';
+    return this.authService.usuarioActual()?.rol === 'SUPERVISOR';
   }
 
   get esOperador(): boolean {
-    return this.authService.rol === 'OPERADOR';
+    return this.authService.usuarioActual()?.rol === 'OPERADOR';
   }
 
   ngOnInit() {
     this.loading = true;
     // Solo cargamos estas dos servicios cuando son OPERADO/SUPERVISOR
     const peticiones: any = {
-      movimientos: this.servidor.listarMovimientos(),
-      lotes: this.servidor.listarLotes(),
+      movimientos: this.servidor.listarMovimientos().pipe(
+        catchError(() => {
+          this.error = 'No se pudo cargar movimientos';
+          return of([]);
+        })
+      ),
+      lotes: this.servidor.listarLotes().pipe(
+        catchError(() => {
+          this.error = 'No se pudo cargar lotes';
+          return of([]);
+        })
+      ),
     };
 
     // Solo ADMIN necesita la lista de usuarios
     if (this.esAdmin) {
-      peticiones.usuarios = this.servidor.listarUsuarios(); // Agregamos la petición de obtener los usuarios al objeto peticiones
+      peticiones.usuarios = this.servidor.listarUsuarios().pipe(
+        catchError(() => {
+          this.error = 'No se pudo cargar usuarios';
+          return of([]);
+        })
+      );
     }
 
-    // Hacemos una petición para obtener los movimientos, lotes y usuarios en paralelo
-    // Con forkJoin() podemos realizar varias peticiones en paralelo
     forkJoin(peticiones).subscribe({
       next: (data: any) => {
         this.movimientos = Array.isArray(data.movimientos) ? data.movimientos : []; // Convertir a un array si no lo es (cuando no llega un array/ no llega nada/ llega null) y en caso que no lo sea poner un array vacio
@@ -69,9 +84,8 @@ export class ListarMov implements OnInit {
         this.loading = false;
       },
       error: (err) => {
-        this.error = 'Error al cargar datos';
+        this.error = getMensajeError(err);
         this.loading = false;
-        console.error(err);
       },
     });
   }
@@ -82,18 +96,11 @@ export class ListarMov implements OnInit {
     return lote?.codigo_lote || `Lote ${loteId}`; // si el lote no se encuentra en el array, se devuelve un string con el id del lote
   }
 
-  // Función para obtener el nombre del usuario
-  getUsuarioNombre(usuarioId: number): string { // usuarioId es el id del usuario que queremos obtener
-    const usuario = this.usuarios.find(u => u.id === usuarioId); // con find() buscamos el usuario en el array de usuarios
-    if (!this.esAdmin) { // si no es admin y el usuario no se encuentra en el array de usuarios
-      return 'N/A';
-    }
-    // Pero si es admin y el usuario no se encuentra en el array de usuarios
-    const usuarioN = this.usuarios.find(u => u.id === usuarioId); // con find() buscamos el usuario en el array de usuarios
-    return usuarioN?.username || `Usuario ${usuarioId}`; // si el usuario no se encuentra en el array, se devuelve un string con el id del usuario
+  getUsuarioNombre(usuarioId: number): string {
+    if (!this.esAdmin) return 'N/A';
+    const usuario = this.usuarios.find(u => u.id === usuarioId);
+    return usuario?.username || `Usuario ${usuarioId}`;
   }
-
-  
 
   filtrarMovimientos() {
     let resultado = [...this.movimientos];

@@ -5,6 +5,8 @@ import { FormsModule } from '@angular/forms';
 import { Servidor } from '../../../core/services/servidor';
 import { AuthService } from '../../../core/interceptors/authService';
 import { Proveedor } from '../../../shared/models/proveedor';
+import Swal from 'sweetalert2';
+import { getMensajeError } from '../../../core/utils/utils';
 
 @Component({
   selector: 'app-listar-pr',
@@ -59,19 +61,42 @@ export class ListarPr implements OnInit {
   }
 
   eliminarProveedor(id: number) {
-    if (!confirm('¿Está seguro de eliminar este proveedor?')) {
-      return;
-    }
+    Swal.fire({
+      title: '¿Estás seguro de que deseas eliminar este proveedor?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.eliminar(id);
+      }
+    })
+  }
+  eliminar(id: number) {
 
     this.servidor.eliminarProveedor(id).subscribe({
       next: () => {
-        this.proveedores = this.proveedores.filter((p) => p.id !== id); // Filtramos los proveedores para que no se muestre el proveedor eliminado
-        this.filtrarProveedores(); // Actualizamos la lista de proveedores
-        alert('Proveedor eliminado correctamente');
+        Swal.fire({
+          icon: 'success',
+          title: 'Proveedor eliminado correctamente',
+          showConfirmButton: false, // Ocultar el botón de confirmación
+          timer: 2000, // Tiempo en milisegundos para cerrar el modal
+        }).then(() => {
+          this.proveedores = this.proveedores.filter((p) => p.id !== id); // Filtramos los proveedores para que no se muestre el proveedor eliminado
+          this.filtrarProveedores(); // Actualizamos la lista de proveedores
+        })
       },
       error: (err) => {
-        alert('Error al eliminar proveedor');
-        console.error(err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al eliminar proveedor',
+          text: getMensajeError(err), // Utiliza la función getMensajeError para obtener el mensaje de error
+          showConfirmButton: false, // Ocultar el botón de confirmación
+          showCloseButton: true // Boton de cerrar
+        })
       },
     });
   }

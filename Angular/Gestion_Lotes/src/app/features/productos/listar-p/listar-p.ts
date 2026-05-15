@@ -2,9 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import Swal from 'sweetalert2';
 import { Servidor } from '../../../core/services/servidor';
 import { AuthService } from '../../../core/interceptors/authService';
 import { Producto } from '../../../shared/models/producto';
+import { getMensajeError } from '../../../core/utils/utils';
 
 @Component({
   selector: 'app-listar-p',
@@ -24,11 +26,10 @@ export class ListarP implements OnInit {
   constructor(private servidor: Servidor, public authService: AuthService, private router: Router) {}
 
   get esAdmin(): boolean {
-    return this.authService.rol === 'ADMIN';
+    return this.authService.usuarioActual()?.rol === 'ADMIN';
   }
 
   ngOnInit() {
-    console.log(this.productos);
     this.cargarProductos();
   }
 
@@ -45,7 +46,6 @@ export class ListarP implements OnInit {
       error: (err) => {
         this.error = 'Error al cargar productos';
         this.loading = false;
-        console.error(err);
       },
     });
   }
@@ -62,20 +62,42 @@ export class ListarP implements OnInit {
   }
 
   eliminarProducto(id: number) {
-    if (!confirm('¿Está seguro de eliminar este producto?')) {
-      return;
-    }
+    Swal.fire({
+      title: '¿Estás seguro de que deseas eliminar este producto?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.eliminar(id);
+      }
+    });
+  }
 
+  eliminar(id: number) {
     this.servidor.eliminarProducto(id).subscribe({
       next: () => {
-        // Eliminar el producto de la lista
         this.productos = this.productos.filter((p) => p.id !== id);
-        this.filtrarProductos(); // Actualizar la lista de productos
-        alert('Producto eliminado correctamente');
+        this.filtrarProductos();
+        Swal.fire({
+          icon: 'success',
+          title: 'Producto eliminado',
+          text: 'El producto se eliminó correctamente',
+          showConfirmButton: false,
+          timer: 2000,
+        });
       },
       error: (err) => {
-        alert('Error al eliminar producto');
-        console.error(err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al eliminar producto',
+          text: getMensajeError(err),
+          showConfirmButton: false,
+          showCloseButton: true,
+        });
       },
     });
   }

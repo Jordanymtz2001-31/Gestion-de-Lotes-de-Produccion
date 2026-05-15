@@ -1,9 +1,11 @@
 import { Component } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import Swal from 'sweetalert2';
 import { Servidor } from '../../../core/services/servidor';
 import { ROLES, Usuario } from '../../../shared/models/usuario';
 import { CrearUsuarioDto } from '../../../shared/models/usuarioDto';
+import { getMensajeError } from '../../../core/utils/utils';
 
 @Component({
   selector: 'app-guardar-u',
@@ -23,9 +25,7 @@ export class GuardarU {
 
   loading = false;
   error = '';
-  success = '';
-
-  roles = ROLES
+  roles = ROLES;
 
   constructor(private servidor: Servidor, private router: Router) {}
 
@@ -37,20 +37,47 @@ export class GuardarU {
 
     this.loading = true;
     this.error = '';
-    this.success = '';
 
+    Swal.fire({
+      title: '¿Confirmas la creación del usuario?',
+      icon: 'question',
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, crearlo',
+      cancelButtonText: 'Cancelar',
+      allowOutsideClick: false,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.guardarUsuario();
+      } else {
+        this.loading = false;
+      }
+    });
+  }
+
+  guardarUsuario() {
     this.servidor.guardarUsuario(this.usuario).subscribe({
       next: () => {
-        this.success = 'Usuario creado correctamente';
         this.loading = false;
-        setTimeout(() => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Usuario creado',
+          text: 'El usuario se creó correctamente',
+          showConfirmButton: false,
+          timer: 2000,
+        }).then(() => {
           this.router.navigate(['/listar-usuarios']);
-        }, 1500);
+        });
       },
       error: (err) => {
         this.loading = false;
-        this.error = err.error?.error || 'Error al crear usuario';
-        console.error(err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al crear usuario',
+          text: getMensajeError(err),
+          showConfirmButton: false,
+          showCloseButton: true,
+        });
       },
     });
   }

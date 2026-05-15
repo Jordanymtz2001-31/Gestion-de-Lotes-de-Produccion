@@ -2,9 +2,11 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import Swal from 'sweetalert2';
 import { Servidor } from '../../../core/services/servidor';
 import { Producto, UNIDADES_MEDIDA } from '../../../shared/models/producto';
 import { CrearProductoDto } from '../../../shared/models/productoDto';
+import { getMensajeError } from '../../../core/utils/utils';
 
 @Component({
   selector: 'app-guardar-p',
@@ -26,10 +28,8 @@ export class GuardarP {
 
   // Las unidades vienen del modelo — un solo lugar para cambiarlas
   unidades = UNIDADES_MEDIDA;
-
   loading = false;
   error = '';
-  success = '';
 
   constructor(private servidor: Servidor, private router: Router) {}
   
@@ -41,20 +41,47 @@ export class GuardarP {
 
     this.loading = true;
     this.error = '';
-    this.success = '';
 
+    Swal.fire({
+      title: '¿Confirmas la creación del producto?',
+      icon: 'question',
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, crearlo',
+      cancelButtonText: 'Cancelar',
+      allowOutsideClick: false,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.guardarProducto();
+      } else {
+        this.loading = false;
+      }
+    });
+  }
+
+  guardarProducto() {
     this.servidor.guardarProducto(this.productoDto).subscribe({
       next: () => {
-        this.success = 'Producto creado correctamente';
         this.loading = false;
-        setTimeout(() => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Producto creado',
+          text: 'El producto se creó correctamente',
+          showConfirmButton: false,
+          timer: 2000,
+        }).then(() => {
           this.router.navigate(['/listar-productos']);
-        }, 1500);
+        });
       },
       error: (err) => {
         this.loading = false;
-        this.error = err.error?.error || 'Error al crear producto';
-        console.error(err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al crear producto',
+          text: getMensajeError(err),
+          showConfirmButton: false,
+          showCloseButton: true,
+        });
       },
     });
   }

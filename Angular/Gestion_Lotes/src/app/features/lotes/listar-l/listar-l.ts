@@ -3,6 +3,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { catchError, forkJoin, of } from 'rxjs';
+import Swal from 'sweetalert2';
 import { Servidor } from '../../../core/services/servidor';
 import { AuthService } from '../../../core/interceptors/authService';
 import { Lote } from '../../../shared/models/lote';
@@ -11,6 +12,7 @@ import { Proveedor } from '../../../shared/models/proveedor';
 import { CambiarEstadoLoteDto } from '../../../shared/models/loteDto';
 import { DESTINOS_SALIDA, TODOS_DESTINOS } from '../../../shared/models/movimiento';
 import { CrearMovimientoDto } from '../../../shared/models/movimientoDto';
+import { getMensajeError } from '../../../core/utils/utils';
 
 @Component({
   selector: 'app-listar-l',
@@ -34,19 +36,20 @@ export class ListarL implements OnInit {
   constructor(private servidor: Servidor, public authService: AuthService) {}
 
   get esAdmin(): boolean {
-    return this.authService.rol === 'ADMIN'; 
+    return this.authService.usuarioActual()?.rol === 'ADMIN'; 
   }
 
   get esOperador(): boolean {
-    return this.authService.rol === 'OPERADOR';
+    return this.authService.usuarioActual()?.rol === 'OPERADOR';
   }
 
   get esSupervisor(): boolean {
-    return this.authService.rol === 'SUPERVISOR';
+    return this.authService.usuarioActual()?.rol === 'SUPERVISOR';
   }
 
   get puedeCrear(): boolean {
-    return this.authService.rol === 'ADMIN' || this.authService.rol === 'OPERADOR';
+    const rol = this.authService.usuarioActual()?.rol;
+    return rol === 'ADMIN' || rol === 'OPERADOR';
   }
 
   ngOnInit() {
@@ -106,6 +109,12 @@ export class ListarL implements OnInit {
     return producto?.nombre || `Producto ${id}`; // si el producto no se encuentra en el array, se devuelve un string con el id del producto
   }
 
+  getUnidadProducto(id: number): string { // id es el id del producto que queremos obtener
+    if (!this.productos.length) return 'No se pudo cargar productos'; // si el array de productos esta vacio, se devuelve un string con el id del producto
+    const producto = this.productos.find(p => p.id === id); // con find() buscamos el producto en el array de productos
+    return producto?.unidad_medida || `Unidad ${id}`; // si el producto no se encuentra en el array, se devuelve un string con el id del producto
+  }
+
   // Metodo para obtener el nombre de un proveedor dado su id
   getProveedorNombre(id: number): string { // id es el id del proveedor que queremos obtener
     if (!this.proveedores.length) return 'No se pudo cargar proveedores'; // si el array de proveedores esta vacio, se devuelve un string con el id del proveedor
@@ -139,11 +148,22 @@ filtrarLotes() {
       next: (loteActualizado) => {
         lote.estado = loteActualizado.estado;
         this.filtrarLotes();
-        alert(`Lote ${nuevoEstado === 'APROBADO' ? 'aprobado' : 'rechazado'} correctamente`);
+        Swal.fire({
+          icon: 'success',
+          title: 'Lote actualizado',
+          text: `Lote ${nuevoEstado === 'APROBADO' ? 'aprobado' : 'rechazado'} correctamente`,
+          showConfirmButton: false,
+          timer: 2000,
+        });
       },
       error: (err) => {
-        alert(err.error?.error || 'Error al cambiar el estado del lote');
-        console.error(err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al cambiar el estado',
+          text: getMensajeError(err),
+          showConfirmButton: false,
+          showCloseButton: true,
+        });
       },
     });
   }
@@ -277,16 +297,20 @@ filtrarLotes() {
     // Mandamos el movimiento
     this.servidor.registrarMovimiento(movimiento).subscribe({
       next: () => {
-        // Recargar lotes del servidor (ya tiene la cantidad_actual actualizada)
         this.cargarLotes();
         this.cerrarModalSalida();
-        alert('Salida registrada correctamente');
+        Swal.fire({
+          icon: 'success',
+          title: 'Salida registrada',
+          text: 'La salida se registró correctamente',
+          showConfirmButton: false,
+          timer: 2000,
+        });
         this.loadingSalida = false;
       },
       error: (err) => {
-        this.errorSalida = err.error?.error || 'Error al registrar la salida';
+        this.errorSalida = getMensajeError(err);
         this.loadingSalida = false;
-        console.error(err);
       },
     });
   }

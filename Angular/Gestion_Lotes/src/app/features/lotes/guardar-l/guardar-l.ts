@@ -2,10 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import Swal from 'sweetalert2';
 import { Servidor } from '../../../core/services/servidor';
 import { Producto } from '../../../shared/models/producto';
 import { Proveedor } from '../../../shared/models/proveedor';
 import { CrearLoteDto } from '../../../shared/models/loteDto';
+import { getMensajeError } from '../../../core/utils/utils';
 
 @Component({
   selector: 'app-guardar-l',
@@ -63,21 +65,47 @@ export class GuardarL implements OnInit {
 
     this.loading = true;
     this.error = '';
-    this.success = '';
 
+    Swal.fire({
+      title: '¿Confirmas la creación del lote?',
+      icon: 'question',
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, crearlo',
+      cancelButtonText: 'Cancelar',
+      allowOutsideClick: false,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.guardarLote();
+      } else {
+        this.loading = false;
+      }
+    });
+  }
 
+  guardarLote() {
     this.servidor.guardarLote(this.lote).subscribe({
       next: () => {
-        this.success = 'Lote creado correctamente';
         this.loading = false;
-        setTimeout(() => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Lote creado',
+          text: 'El lote se creó correctamente',
+          showConfirmButton: false,
+          timer: 2000,
+        }).then(() => {
           this.router.navigate(['/listar-lotes']);
-        }, 1500);
+        });
       },
       error: (err) => {
         this.loading = false;
-        this.error = err.error?.error || 'Error al crear lote';
-        console.error(err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al crear lote',
+          text: getMensajeError(err),
+          showConfirmButton: false,
+          showCloseButton: true,
+        });
       },
     });
   }

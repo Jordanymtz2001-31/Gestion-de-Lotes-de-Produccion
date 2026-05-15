@@ -2,10 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { catchError, forkJoin, of } from 'rxjs';
+import Swal from 'sweetalert2';
 import { AuthService } from '../../core/interceptors/authService';
 import { Lote } from '../../shared/models/lote';
 import { Servidor } from '../../core/services/servidor';
 import { Producto } from '../../shared/models/producto';
+import { getMensajeError } from '../../core/utils/utils';
 
 @Component({
   selector: 'app-dashboard',

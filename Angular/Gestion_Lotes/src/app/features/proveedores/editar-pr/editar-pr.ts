@@ -5,6 +5,8 @@ import { FormsModule } from '@angular/forms';
 import { Servidor } from '../../../core/services/servidor';
 import { Proveedor } from '../../../shared/models/proveedor';
 import { EditarProveedorDto } from '../../../shared/models/proveedorDto';
+import Swal from 'sweetalert2';
+import { getMensajeError } from '../../../core/utils/utils';
 
 @Component({
   selector: 'app-editar-pr',
@@ -26,10 +28,7 @@ export class EditarPr implements OnInit {
   error = '';
   success = '';
 
-  constructor(
-    private servidor: Servidor,
-    private router: Router,
-    private route: ActivatedRoute
+  constructor(private servidor: Servidor, private router: Router, private route: ActivatedRoute
   ) {}
 
   ngOnInit() {
@@ -62,22 +61,45 @@ export class EditarPr implements OnInit {
       return;
     }
 
+    Swal.fire({
+      title: '¿Confirmas la edición del proveedor?',
+      icon: 'question',
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Si editarlo',
+      cancelButtonText: 'Cancelar',
+      allowOutsideClick: false, // No permitir cerrar el modal haciendo clic fuera de ella
+    }).then((result) => {
+    if (result.isConfirmed) {
+      this.editarProveedor();
+    }
+    });
+  }
+  
+  editarProveedor() {
+    
     this.loading = true;
-    this.error = '';
-    this.success = '';
 
     this.servidor.editarProveedor(this.proveedor).subscribe({
       next: () => {
-        this.success = 'Proveedor actualizado correctamente';
-        this.loading = false;
-        setTimeout(() => {
-          this.router.navigate(['/listar-proveedores']);
-        }, 1500);
+        Swal.fire({
+          icon: 'success',
+          title: 'Proveedor editado correctamente',
+          showConfirmButton: false, // Ocultar el botón de confirmación
+          timer: 2000, // Tiempo en milisegundos para cerrar el modal
+        }).then(() => {
+        this.router.navigate(['/listar-proveedores']);
+        })
       },
       error: (err) => {
         this.loading = false;
-        this.error = err.error?.error || 'Error al actualizar proveedor';
-        console.error(err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al editar proveedor',
+          text: getMensajeError(err), // Utiliza la función getMensajeError para obtener el mensaje de error
+          showConfirmButton: false, // Ocultar el botón de confirmación
+          showCloseButton: true // Boton de cerrar
+        })
       },
     });
   }
