@@ -58,6 +58,36 @@
     </div>
   </div>
 
+  <!-- KPI Stock Alerts -->
+  <div class="row mb-4">
+    @if (lotesStockBajo > 0) {
+    <div class="col-md-3 mb-3">
+      <div class="kpi-card kpi-warning">
+        <div class="kpi-icon">
+          <i class="bi bi-exclamation-circle"></i>
+        </div>
+        <div class="kpi-content">
+          <span class="kpi-value">{{ lotesStockBajo }}</span>
+          <span class="kpi-label">Stock Bajo (&lt;10)</span>
+        </div>
+      </div>
+    </div>
+    }
+    @if (lotesAgotados > 0) {
+    <div class="col-md-3 mb-3">
+      <div class="kpi-card kpi-danger">
+        <div class="kpi-icon">
+          <i class="bi bi-exclamation-triangle"></i>
+        </div>
+        <div class="kpi-content">
+          <span class="kpi-value">{{ lotesAgotados }}</span>
+          <span class="kpi-label">Agotados</span>
+        </div>
+      </div>
+    </div>
+    }
+  </div>
+
   <!-- Acciones Rápidas -->
   <div class="row mb-4">
     <div class="col-12">
@@ -136,8 +166,8 @@
                   [class.bg-warning]="lote.estado === 'REVISION'"
                   [class.text-dark]="lote.estado === 'REVISION'"
                   [class.bg-success]="lote.estado === 'APROBADO'"
-                  [class.bg-danger]="lote.estado  === 'RECHAZADO'"
-                  [class.bg-secondary]="lote.estado === 'AGOTADO'">
+                  [class.bg-secondary]="lote.estado  === 'RECHAZADO'"
+                  [class.bg-danger]="lote.estado === 'AGOTADO'">
                     {{ lote.estado }}
                   </span>
                 </td>

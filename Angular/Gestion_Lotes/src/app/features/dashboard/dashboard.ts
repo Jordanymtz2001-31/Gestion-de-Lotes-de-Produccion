@@ -26,6 +26,8 @@ export class Dashboard implements OnInit {
   totalLotes = 0;
   lotesRevision = 0;
   lotesAprobados = 0;
+  lotesAgotados = 0;
+  lotesStockBajo = 0;
 
   errores: string[] = []; // Creamos un array de errores para mostrarlos en la vista
 
@@ -79,6 +81,10 @@ export class Dashboard implements OnInit {
         this.totalLotes = lotes.length;
         this.lotesRevision = lotes.filter(l => l.estado === 'REVISION').length;
         this.lotesAprobados = lotes.filter(l => l.estado === 'APROBADO').length;
+        this.lotesAgotados = lotes.filter(l => l.estado === 'AGOTADO').length;
+        this.lotesStockBajo = lotes.filter(l => 
+          l.estado === 'APROBADO' && l.cantidad_actual > 0 && l.cantidad_actual < 10
+        ).length;
         this.lotesRecientes = lotes.slice(0, 10);
       },
       error: (err) => {
