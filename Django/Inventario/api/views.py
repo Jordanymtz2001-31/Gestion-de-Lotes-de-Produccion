@@ -183,7 +183,7 @@ class MovimientoViewSet(viewsets.ModelViewSet):
     serializer_class = MovimientoSerializer
 
     # Creamos una funcion para filtrar la lista de movimientos segun el rol
-    # En ves de realizarlo en la base de datos, lo hacemos en el frontend
+    # En ves de realizarlo en la base de datos, lo hacemos en el backend
     def get_queryset(self):
         # Obtenemos los headers de la peticion
         rol = self.request.user_rol

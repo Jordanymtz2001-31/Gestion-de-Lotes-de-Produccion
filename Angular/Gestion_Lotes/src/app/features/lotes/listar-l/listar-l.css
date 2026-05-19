@@ -22,6 +22,8 @@
 .filters-row {
   display: flex;
   gap: var(--space-4);
+  width: 100%;
+  box-sizing: border-box;
   margin-bottom: var(--space-5);
 }
 

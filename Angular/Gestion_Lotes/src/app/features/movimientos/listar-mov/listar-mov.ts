@@ -9,6 +9,19 @@ import { Movimiento, TODOS_DESTINOS, TIPOS_MOVIMIENTO } from '../../../shared/mo
 import { Lote } from '../../../shared/models/lote';
 import { Usuario } from '../../../shared/models/usuario';
 import { getMensajeError } from '../../../core/utils/utils';
+import * as XLSX from 'xlsx'; 
+
+  //Encabezados para el excel
+  const headers = {
+    id: 'Identificador',
+    lote: 'Codigo de Lote',
+    usuario: 'Usuario',
+    tipo: 'Tipo',
+    destino: 'Destino',
+    cantidad: 'Cantidad',
+    observaciones: 'Observaciones',
+    fecha: 'Fecha',
+  }
 
 @Component({
   selector: 'app-listar-mov',
@@ -102,6 +115,7 @@ export class ListarMov implements OnInit {
     return usuario?.username || `Usuario ${usuarioId}`;
   }
 
+
   filtrarMovimientos() {
     let resultado = [...this.movimientos];
 
@@ -141,5 +155,37 @@ export class ListarMov implements OnInit {
   // Función para obtener la clase del badge dependiendo del tipo de movimiento se muestre en color verde o rojo
   getBadgeClass(tipo: string): string {
     return tipo === 'ENTRADA' ? 'badge-success' : 'badge-danger';
+  }
+
+  exportAExcel(): void {
+    this.servidor.listarMovimientos().subscribe(
+      (movimientos) => {
+        // Ajustamos las cabeceras a los nombres de las columnas
+        const movimientosConEncabezados = movimientos.map((m) => ({
+          [headers.id]: m.id,
+
+          //Le paso los metodos getLoteCodigo y getUsuarioNombre
+          [headers.lote]: this.getLoteCodigo(m.lote),
+          [headers.usuario]: this.getUsuarioNombre(m.usuario_id),
+          
+          [headers.tipo]: m.tipo,
+          [headers.cantidad]: m.cantidad,
+          [headers.destino]: m.destino,
+          [headers.observaciones]: m.observaciones,
+          [headers.fecha]: m.fecha
+        }))
+        // Convertir array de movimientos a hoja de calculo
+        const worksheet = XLSX.utils.json_to_sheet(movimientosConEncabezados);
+        // Crea workbook 
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Movimientos');
+
+        // Descargar como archivo excel
+        XLSX.writeFile(workbook, 'movimientos.xlsx');
+      },
+      (error) => {
+        console.error('Error al exportar a Excel', error);
+      }
+    )
   }
 }

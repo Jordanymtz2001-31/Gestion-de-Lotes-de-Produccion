@@ -39,7 +39,7 @@ export class ListarU implements OnInit {
         this.loading = false;
       },
       error: (err) => {
-        this.error = getMensajeError(err);
+        this.error = 'Error al cargar usuarios';
         this.loading = false;
       },
     });
