@@ -45,9 +45,9 @@ export class Login {
         Swal.fire({
           icon: 'error',
           title: 'Error de autenticación',
-          text: getMensajeError(err), // Utiliza la función getMensajeError para obtener el mensaje de error
+          text: 'No se pudo autenticar el usuario, por favor verifique sus credenciales o intente nuevamente mas tarde', // Utiliza la función getMensajeError para obtener el mensaje de error
           showConfirmButton: false, // Ocultar el botón de confirmación
-          timer: 2000, // Tiempo en milisegundos para cerrar el modal
+          timer: 9000, // Tiempo en milisegundos para cerrar el modal
           allowOutsideClick: false // No permitir cerrar el modal haciendo clic fuera de ella
       }).then(() => { // Entonces de cerrar el modal, limpiamos los campos
         this.username = '';
